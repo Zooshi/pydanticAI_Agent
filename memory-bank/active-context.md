@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Session Focus
-**Task:** [UI] Streamlit Chat Interface (Task #11 from progress-tracker.md) - COMPLETED
+**Task:** [UI] Agent Integration & Streaming (Task #12 from progress-tracker.md) - COMPLETED
 
 ## Recent Changes
 
@@ -852,8 +852,72 @@ FinancialAgentError (base)
 - State persistence: Only within active session (no database/file storage)
 - E2E test approach: Pytest fixtures + Playwright automation (skill-based)
 
+### 2025-12-27 - Agent Integration & Streaming
+**Status:** COMPLETED
+
+**Completed:**
+- Updated app.py with full PydanticAI agent integration:
+  - Added imports:
+    - pydantic_ai.messages.ModelMessage for history format conversion
+    - src.agent.financial_agent.create_agent for agent creation
+    - src.agent.streaming.stream_agent_response for streaming responses
+    - src.utils.exceptions (ConfigurationError, RateLimitExceededError, ToolExecutionError)
+  - Created convert_to_pydantic_history() function:
+    - Converts Streamlit message format to PydanticAI format
+    - Transforms "assistant" role to "model" role (PydanticAI convention)
+    - Returns list[ModelMessage] for agent consumption
+    - Full type hints and Google-style docstring
+  - Completely rewrote handle_user_input() function:
+    - Removed placeholder response logic
+    - Creates agent with st.session_state.model_choice
+    - Converts message history to PydanticAI format (excluding current user message)
+    - Streams agent response using st.write_stream(stream_agent_response(...))
+    - Comprehensive error handling with four exception types:
+      - ConfigurationError: Missing API keys or invalid config
+      - RateLimitExceededError: YFinance rate limit exceeded
+      - ToolExecutionError: Tool execution failures
+      - Generic Exception: Catch-all with stack trace display
+    - User-friendly error messages displayed with st.error()
+    - Errors added to conversation history for persistence
+    - Full error messages include troubleshooting hints
+  - Streaming response integration:
+    - st.write_stream() displays chunks in real-time
+    - Response text captured and added to session state
+    - Tool usage transparency from agent's system instructions
+  - Module docstring updated to reflect agent integration
+
+**Test Results:**
+- All unit tests: 141/141 passing (no regressions)
+- Test execution time: 8.83s
+- Command used: cd /c/Users/danie/OneDrive/Desktop/cur/27122025 && source daniel/Scripts/activate && python -m pytest tests/unit/ -v
+- Manual testing: Ready for manual verification with Streamlit app
+
+**Files Modified:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\app.py (full agent integration)
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\progress-tracker.md (Task #12 marked complete, 12/15 completed)
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\active-context.md (this file)
+
+**Implementation Details:**
+- Message history conversion excludes current user message (passed separately to stream_agent_response)
+- History slicing: st.session_state.messages[:-1] to exclude just-added user message
+- Error handling strategy: Catch specific exceptions first, generic last
+- Error persistence: All errors added to session state for conversation continuity
+- Stack trace display: Only for generic exceptions (debugging aid)
+- Model creation: Fresh agent instance created per user message
+- Streaming display: st.write_stream() handles generator consumption and real-time display
+- Return value capture: st.write_stream() returns complete text for history storage
+
+**Critical Design Decisions:**
+- Agent created per message (not cached): Ensures fresh state and LogFire tracking
+- Message format conversion: Streamlit format stored, PydanticAI format for agent
+- Error display strategy: st.error() for UI display + add to history for persistence
+- Tool transparency: Handled by agent's system instructions (no UI-level notifications)
+- Streaming chunks: Displayed immediately without buffering
+- ConfigurationError handling: Includes helpful hint about .env file
+- Generic exception handling: Shows full stack trace with st.exception() for debugging
+
 **Next Task:**
-- Task #12: [UI] Agent Integration & Streaming
-- Will integrate create_agent() and stream_agent_response() from agent layer
-- Will replace placeholder responses with real agent streaming
-- Will add error handling UI for tool/configuration errors
+- Task #13: [Test] Integration Test Suite
+- Will create integration tests for agent + tool interaction with mocked APIs
+- Will test session state management logic
+- Will test error propagation from tools through agent to UI layer

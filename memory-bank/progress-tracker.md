@@ -2,8 +2,8 @@
 
 ## Status
 - **Total Tickets:** 15
-- **Completed:** 11
-- **Pending:** 4
+- **Completed:** 12
+- **Pending:** 3
 
 ## Implementation Backlog (Ordered)
 
@@ -39,7 +39,7 @@
 
 - [x] **[UI] Streamlit Chat Interface**: Create app.py with main Streamlit application, implement chat UI with st.chat_message for alternating user/agent messages, create model selection dropdown (options: "OLLAMA qwen3:8b", "OpenAI gpt-4.1-mini"), initialize session state for conversation history (list of dicts with role and content keys), implement user input handling with st.chat_input, display conversation history from session state on page load, add clear chat button to reset session state, and validate config on app startup (call validate_config() from config.py).
 
-- [ ] **[UI] Agent Integration & Streaming**: Extend app.py to integrate create_agent() and stream_response() from agent layer, on user message submission: append user message to session state, create agent with selected model, call stream_response() and render chunks in real-time using st.write_stream or similar, append complete agent response to session state, implement error handling UI (use st.error for RateLimitExceededError, ToolExecutionError, ConfigurationError), display full stack trace with st.exception for unexpected errors, and ensure UI remains responsive during streaming.
+- [x] **[UI] Agent Integration & Streaming**: Extend app.py to integrate create_agent() and stream_response() from agent layer, on user message submission: append user message to session state, create agent with selected model, call stream_response() and render chunks in real-time using st.write_stream or similar, append complete agent response to session state, implement error handling UI (use st.error for RateLimitExceededError, ToolExecutionError, ConfigurationError), display full stack trace with st.exception for unexpected errors, and ensure UI remains responsive during streaming.
 
 ### Phase 6: Testing & Quality
 
@@ -75,6 +75,8 @@
 - **[Agent] Streaming Response Handler**: Created src/agent/streaming.py with stream_agent_response() synchronous generator and stream_agent_response_async() async generator. Implemented chunk-based streaming using PydanticAI's agent.run_stream() with result.stream_text(delta=True). Tool transparency handled via agent system instructions. Comprehensive error handling catches ToolExecutionError and generic exceptions, yielding error messages as chunks. Created 16 unit tests covering successful streaming, conversation history, tool detection, error handling, empty responses, and Unicode text. All 141 unit tests passing.
 
 - **[UI] Streamlit Chat Interface**: Created app.py with comprehensive Streamlit chat interface. Implemented clean UI with model selection dropdown (OLLAMA qwen2.5:3b and OpenAI gpt-4o-mini options), chat message display using st.chat_message, chat input handling with st.chat_input, and New Session button to clear history. Session state management stores messages list and model choice. Modular architecture with separate functions for initialize_session_state(), clear_chat_history(), render_sidebar(), render_chat_history(), and handle_user_input(). Page configuration includes title, icon, and layout settings. Placeholder assistant responses for UI testing (actual agent integration in Task #12). Created E2E test structure in tests/e2e/test_streamlit_ui.py with pytest fixtures for Streamlit server management and test placeholders for Playwright automation. Created Playwright test script in C:\tmp\playwright-test-streamlit.js for comprehensive UI testing (model selection, chat functionality, session management). All 141 unit tests still passing.
+
+- **[UI] Agent Integration & Streaming**: Updated app.py with full PydanticAI agent integration. Added imports for ModelMessage, create_agent, stream_agent_response, and custom exceptions. Created convert_to_pydantic_history() function to convert Streamlit message format ("assistant" role) to PydanticAI format ("model" role). Completely rewrote handle_user_input() to replace placeholder logic with real agent streaming: creates agent with selected model, converts message history, streams response with st.write_stream(stream_agent_response(...)), captures response text for history storage. Comprehensive error handling with four exception types: ConfigurationError (missing API keys), RateLimitExceededError (YFinance rate limits), ToolExecutionError (tool failures), and generic Exception (with stack trace). User-friendly error messages displayed with st.error() and added to conversation history for persistence. All 141 unit tests passing. Ready for manual testing with Streamlit app.
 
 ## Known Issues
 _None yet. Issues will be logged here as they are discovered during implementation._
