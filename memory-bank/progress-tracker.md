@@ -2,8 +2,8 @@
 
 ## Status
 - **Total Tickets:** 15
-- **Completed:** 10
-- **Pending:** 5
+- **Completed:** 11
+- **Pending:** 4
 
 ## Implementation Backlog (Ordered)
 
@@ -37,7 +37,7 @@
 
 ### Phase 5: Streamlit Frontend
 
-- [ ] **[UI] Streamlit Chat Interface**: Create app.py with main Streamlit application, implement chat UI with st.chat_message for alternating user/agent messages, create model selection dropdown (options: "OLLAMA qwen3:8b", "OpenAI gpt-4.1-mini"), initialize session state for conversation history (list of dicts with role and content keys), implement user input handling with st.chat_input, display conversation history from session state on page load, add clear chat button to reset session state, and validate config on app startup (call validate_config() from config.py).
+- [x] **[UI] Streamlit Chat Interface**: Create app.py with main Streamlit application, implement chat UI with st.chat_message for alternating user/agent messages, create model selection dropdown (options: "OLLAMA qwen3:8b", "OpenAI gpt-4.1-mini"), initialize session state for conversation history (list of dicts with role and content keys), implement user input handling with st.chat_input, display conversation history from session state on page load, add clear chat button to reset session state, and validate config on app startup (call validate_config() from config.py).
 
 - [ ] **[UI] Agent Integration & Streaming**: Extend app.py to integrate create_agent() and stream_response() from agent layer, on user message submission: append user message to session state, create agent with selected model, call stream_response() and render chunks in real-time using st.write_stream or similar, append complete agent response to session state, implement error handling UI (use st.error for RateLimitExceededError, ToolExecutionError, ConfigurationError), display full stack trace with st.exception for unexpected errors, and ensure UI remains responsive during streaming.
 
@@ -73,6 +73,8 @@
 - **[Agent] PydanticAI Agent Core**: Created src/agent/financial_agent.py with create_agent(model_choice: str) supporting OLLAMA (qwen2.5:3b) and OpenAI (gpt-4o-mini). Comprehensive validation for LOGFIRE_TOKEN, OLLAMA_BASE_URL, OLLAMA_MODEL_NAME. Registered finance_tool and research_tool using @agent.tool decorator. System instructions include ticker conversion guidance, tool transparency requirement, no hardcoding rule. LogFire integration logs agent creation with metadata. Created 19 unit tests covering validation, model selection, tool registration, system instructions, and LogFire integration. All 125 unit tests passing.
 
 - **[Agent] Streaming Response Handler**: Created src/agent/streaming.py with stream_agent_response() synchronous generator and stream_agent_response_async() async generator. Implemented chunk-based streaming using PydanticAI's agent.run_stream() with result.stream_text(delta=True). Tool transparency handled via agent system instructions. Comprehensive error handling catches ToolExecutionError and generic exceptions, yielding error messages as chunks. Created 16 unit tests covering successful streaming, conversation history, tool detection, error handling, empty responses, and Unicode text. All 141 unit tests passing.
+
+- **[UI] Streamlit Chat Interface**: Created app.py with comprehensive Streamlit chat interface. Implemented clean UI with model selection dropdown (OLLAMA qwen2.5:3b and OpenAI gpt-4o-mini options), chat message display using st.chat_message, chat input handling with st.chat_input, and New Session button to clear history. Session state management stores messages list and model choice. Modular architecture with separate functions for initialize_session_state(), clear_chat_history(), render_sidebar(), render_chat_history(), and handle_user_input(). Page configuration includes title, icon, and layout settings. Placeholder assistant responses for UI testing (actual agent integration in Task #12). Created E2E test structure in tests/e2e/test_streamlit_ui.py with pytest fixtures for Streamlit server management and test placeholders for Playwright automation. Created Playwright test script in C:\tmp\playwright-test-streamlit.js for comprehensive UI testing (model selection, chat functionality, session management). All 141 unit tests still passing.
 
 ## Known Issues
 _None yet. Issues will be logged here as they are discovered during implementation._

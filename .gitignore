@@ -26,3 +26,7 @@ Thumbs.db
 # Coverage reports
 .coverage
 htmlcov/
+
+# Node modules (Playwright skill)
+node_modules/
+package-lock.json
