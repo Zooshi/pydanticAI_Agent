@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Session Focus
-**Task:** [Tool] YFinance Finance Tool (Task #7 from progress-tracker.md) - COMPLETED
+**Task:** [Tool] Tavily Research Tool (Task #8 from progress-tracker.md) - COMPLETED
 
 ## Recent Changes
 
@@ -449,8 +449,106 @@ FinancialAgentError (base)
 - Tool focuses on API integration and error handling
 - Rate limiting enforced at tool level (not agent level)
 
+### 2025-12-27 - Tavily Research Tool
+**Status:** COMPLETED
+
+**Completed:**
+- Created src/tools/research_tool.py with comprehensive web search functionality:
+  - search_web(query: str, max_results: int = 5) function that performs web searches via Tavily API
+  - Comprehensive input validation:
+    - API key presence check with helpful error message
+    - Query type validation (must be non-empty string)
+    - Query whitespace trimming
+    - max_results validation (must be integer between 1 and 20)
+  - Tavily API integration:
+    - TavilyClient initialization with TAVILY_API_KEY from config
+    - Basic search depth for faster responses
+    - Structured result extraction from API response
+  - Returns structured dict with 3 fields:
+    - query: The original search query
+    - results: List of search results (title, url, content)
+    - source_count: Total number of sources returned
+  - Comprehensive error handling:
+    - Missing API key -> ToolExecutionError with setup instructions
+    - Invalid query/parameters -> ToolExecutionError with specific validation message
+    - Authentication errors -> ToolExecutionError with API key verification hint
+    - Network errors -> ToolExecutionError with connection troubleshooting hint
+    - Rate limit errors -> ToolExecutionError with wait/upgrade suggestion
+    - Invalid response format -> ToolExecutionError with format details
+    - Malformed results are skipped gracefully
+    - Missing fields use sensible defaults ("No title", "No content available")
+  - Full type hints with dict[str, Any] return type
+  - Google-style docstrings with examples
+  - No Unicode characters (Windows compatibility)
+  - NO rate limiting (only YFinance has rate limits per spec)
+
+- Created comprehensive unit tests (tests/unit/test_research_tool.py):
+  - TestSearchWebSuccess: 7 test cases
+    - Valid query returns structured results
+    - Custom max_results parameter respected
+    - Empty results list handled correctly
+    - Missing fields use default values
+    - Query whitespace trimmed correctly
+    - Malformed results skipped gracefully
+    - All expected result fields present
+  - TestSearchWebMissingAPIKey: 2 test cases
+    - Missing API key raises ToolExecutionError
+    - Empty API key raises ToolExecutionError
+  - TestSearchWebInvalidInput: 7 test cases
+    - Empty string raises error
+    - Whitespace-only query raises error
+    - None query raises error
+    - Integer query raises error
+    - max_results too small raises error
+    - max_results too large raises error
+    - Non-integer max_results raises error
+  - TestSearchWebAPIErrors: 6 test cases
+    - Authentication errors wrapped with helpful message
+    - Network errors wrapped with connection hint
+    - Rate limit errors wrapped with wait suggestion
+    - Generic API errors wrapped with query context
+    - Invalid response format raises error
+    - Invalid results format raises error
+  - Total: 22 test cases, all passing
+  - All tests mock TavilyClient with unittest.mock
+  - No real API calls in tests
+  - Mock responses include realistic result structures
+
+**Test Results:**
+- Research tool tests: 22/22 passing
+- All unit tests: 106/106 passing (84 previous + 22 new)
+- Test execution time: 8.27s
+- Command used: daniel/Scripts/python.exe -m pytest tests/unit/ -v
+
+**Files Created:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\src\tools\research_tool.py
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\tests\unit\test_research_tool.py
+
+**Files Modified:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\progress-tracker.md (Task #8 marked complete, 8/15 completed)
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\active-context.md (this file)
+
+**Implementation Details:**
+- Function signature: search_web(query: str, max_results: int = 5) -> dict[str, Any]
+- Default max_results is 5 (reasonable for most queries)
+- Uses "basic" search depth for faster responses
+- Tavily client created per function call (no global instance needed)
+- API key loaded from config.TAVILY_API_KEY
+- Error messages categorized by error type (auth, network, rate limit, generic)
+- Structured result format matches task specification exactly
+- Type validation happens before API calls to avoid wasted requests
+- Missing/malformed result fields handled gracefully with defaults
+
+**Critical Design Decisions:**
+- NO rate limiting for Tavily (only YFinance has rate limits per spec)
+- AI agent determines what to search for (NOT the tool)
+- Tool receives search query as string input
+- Tool focuses on API integration and error handling
+- max_results bounded to 1-20 to prevent excessive API usage
+- Basic search depth prioritizes speed over comprehensiveness
+
 **Next Task:**
-- Task #8: [Tool] Tavily Research Tool
-- Will create tools/research.py with web search functionality
-- Will use ToolExecutionError for API failures
-- Similar structure to finance_tool.py
+- Task #9: [Agent] PydanticAI Agent Core
+- Will create agent/core.py with agent initialization
+- Will register both finance_tool and research_tool
+- Will implement streaming and LogFire integration

@@ -2,8 +2,8 @@
 
 ## Status
 - **Total Tickets:** 15
-- **Completed:** 7
-- **Pending:** 8
+- **Completed:** 8
+- **Pending:** 7
 
 ## Implementation Backlog (Ordered)
 
@@ -27,7 +27,7 @@
 
 - [x] **[Tool] YFinance Finance Tool**: Create tools/finance.py with get_stock_price(ticker: str) function, implement ticker validation using validate_ticker() helper, integrate rate limiter check before API call, fetch latest stock price using yfinance library, handle errors (ticker not found, API failures) by raising ToolExecutionError with clear messages, return structured dict with price, currency, timestamp, and write unit tests in tests/unit/test_finance_tool.py with mocked yfinance API (test valid ticker, test invalid ticker, test rate limit, test API error).
 
-- [ ] **[Tool] Tavily Research Tool**: Create tools/research.py with web_search(query: str) function, implement Tavily API integration using TAVILY_API_KEY from config, handle API errors by raising ToolExecutionError, return structured dict with search results and summary, and write unit tests in tests/unit/test_research_tool.py with mocked Tavily API (test successful search, test API error, test empty results).
+- [x] **[Tool] Tavily Research Tool**: Create tools/research.py with web_search(query: str) function, implement Tavily API integration using TAVILY_API_KEY from config, handle API errors by raising ToolExecutionError, return structured dict with search results and summary, and write unit tests in tests/unit/test_research_tool.py with mocked Tavily API (test successful search, test API error, test empty results).
 
 ### Phase 4: Agent Layer
 
