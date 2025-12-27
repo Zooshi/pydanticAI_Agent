@@ -122,7 +122,7 @@ def create_agent(model_choice: str) -> Agent:
 
     # Configure LogFire for observability
     logfire.configure(token=LOGFIRE_TOKEN)
-
+    logfire.instrument_pydantic()
     # Determine model based on choice
     if model_choice_lower == "ollama":
         # Validate OLLAMA configuration
