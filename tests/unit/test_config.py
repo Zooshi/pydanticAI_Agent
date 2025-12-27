@@ -13,8 +13,8 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-import config
-from config import (
+from src import config
+from src.config import (
     ConfigurationError,
     get_config_summary,
     validate_config,

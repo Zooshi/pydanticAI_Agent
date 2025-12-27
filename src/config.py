@@ -13,7 +13,7 @@ Constants:
     MAX_TICKER_LOOKUPS_PER_MINUTE: Rate limit for YFinance ticker lookups (default: 10)
 
 Example:
-    from config import validate_config, TAVILY_API_KEY
+    from src.config import validate_config, TAVILY_API_KEY
 
     # Validate configuration before running agent
     validate_config(model="openai")
@@ -32,7 +32,8 @@ class ConfigurationError(Exception):
 
 
 # Load environment variables from .env file if it exists
-env_path = Path(__file__).resolve().parent / ".env"
+# Look for .env in the project root (parent of src/)
+env_path = Path(__file__).resolve().parent.parent / ".env"
 if env_path.exists():
     load_dotenv(dotenv_path=env_path)
 else:
