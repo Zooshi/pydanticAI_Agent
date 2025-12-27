@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Session Focus
-**Task:** [UI] Agent Integration & Streaming (Task #12 from progress-tracker.md) - COMPLETED
+**Task:** Bug Fixes - OLLAMA Model Name & Message History Type Error - COMPLETED
 
 ## Recent Changes
 
@@ -916,8 +916,51 @@ FinancialAgentError (base)
 - ConfigurationError handling: Includes helpful hint about .env file
 - Generic exception handling: Shows full stack trace with st.exception() for debugging
 
+### 2025-12-27 - Bug Fixes: OLLAMA Model Name & Union Type Error
+**Status:** COMPLETED
+
+**Issues Discovered During Manual Testing:**
+1. **OLLAMA Model 404 Error**: Model "qwen2.5:3b" not found (should be "qwen3:8b")
+2. **OpenAI Union Type Error**: "'typing.Union' object is not callable" when creating message history
+
+**Root Causes:**
+1. Wrong OLLAMA model name in config default values (qwen2.5:3b instead of qwen3:8b per original spec)
+2. Incorrect ModelMessage usage in app.py - ModelMessage is a Union type, not a class constructor
+
+**Fixes Applied:**
+- Updated src/config.py:
+  - Changed OLLAMA_MODEL_NAME default from "qwen2.5:3b" to "qwen3:8b" (line 48)
+  - Updated docstring model name reference (line 12)
+  - Updated validation error message (line 117)
+- Updated src/agent/financial_agent.py:
+  - Changed model documentation from "qwen2.5:3b" to "qwen3:8b" (line 82)
+  - Updated error message default value (line 136)
+- Updated app.py:
+  - Removed ModelMessage import (was line 12)
+  - Changed convert_to_pydantic_history() return type from list[ModelMessage] to list[dict[str, str]]
+  - Replaced ModelMessage() constructor calls with dictionary creation
+  - Updated model dropdown display text to "OLLAMA (qwen3:8b)"
+
+**Test Results:**
+- All 141 unit tests passing (no regressions)
+- Test execution time: 7.88s
+- Command: daniel/Scripts/python.exe -m pytest tests/unit/ -v --tb=short
+
+**Files Modified:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\src\config.py
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\src\agent\financial_agent.py
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\app.py
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\git_tracker.md
+
+**Git Commits:**
+- a2f0d80: fix: Correct OLLAMA model name (qwen2.5:3b → qwen3:8b) and fix Union type error in message history
+
+**Implementation Notes:**
+- PydanticAI accepts message_history as list of dictionaries with "role" and "content" keys
+- ModelMessage is a Union type alias in pydantic_ai.messages, not a class
+- Message format: {"role": "user"/"model", "content": "..."}
+- No changes to test suite needed - bug was in implementation only
+
 **Next Task:**
-- Task #13: [Test] Integration Test Suite
-- Will create integration tests for agent + tool interaction with mocked APIs
-- Will test session state management logic
-- Will test error propagation from tools through agent to UI layer
+- Manual testing validation with live Streamlit app
+- Task #13: [Test] Integration Test Suite (if manual testing successful)
