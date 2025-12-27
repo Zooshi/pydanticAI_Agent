@@ -8,6 +8,9 @@ The streaming implementation uses PydanticAI's native run_stream() method which
 provides chunk-based streaming (not token-by-token) that is compatible with
 Streamlit's st.write_stream() display function.
 
+For reasoning models (like qwen3:8b), this module filters out thinking/reasoning
+tokens to show only the final answer to users.
+
 Example:
     from src.agent.financial_agent import create_agent
     from src.agent.streaming import stream_agent_response
@@ -19,6 +22,7 @@ Example:
         print(chunk, end="", flush=True)
 """
 
+import re
 from collections.abc import AsyncGenerator, Generator
 from typing import Any
 
@@ -26,6 +30,45 @@ from pydantic_ai import Agent
 from pydantic_ai.messages import ModelMessage
 
 from src.utils.exceptions import ToolExecutionError
+
+
+def filter_thinking_tokens(text: str) -> str:
+    """Filter out thinking/reasoning tokens from model output.
+
+    Reasoning models like qwen3, DeepSeek-R1, and similar models output their
+    internal thinking process before the final answer. This function removes
+    those thinking blocks to show only the final response.
+
+    Common thinking patterns:
+    - <think>...</think> or <thinking>...</thinking>
+    - <|thinking|>...</|end_thinking|>
+    - Think: ... (followed by Answer: or Final Answer:)
+
+    Args:
+        text: Raw text output from the model
+
+    Returns:
+        Filtered text with thinking blocks removed
+
+    Example:
+        >>> text = "<think>Let me calculate... 2+2=4</think>The answer is 4."
+        >>> filter_thinking_tokens(text)
+        'The answer is 4.'
+    """
+    # Remove XML-style thinking tags
+    text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<thinking>.*?</thinking>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<\|thinking\|>.*?</?\|end_thinking\|>', '', text, flags=re.DOTALL)
+    # Alternative pattern for pipe-delimited thinking blocks (DeepSeek-R1 format)
+    text = re.sub(r'<[|]thinking[|]>.*?</?\|?end_thinking[|]>', '', text, flags=re.DOTALL)
+
+    # Remove "Think:" sections followed by "Answer:" or "Final Answer:"
+    text = re.sub(r'(?i)^.*?(?:think|reasoning|internal thought):.*?(?=(?:answer|final answer|response):)', '', text, flags=re.DOTALL)
+
+    # Remove leading/trailing whitespace
+    text = text.strip()
+
+    return text
 
 
 def stream_agent_response(
@@ -83,40 +126,57 @@ def stream_agent_response(
         This nested async function handles the PydanticAI streaming logic and
         is wrapped by the synchronous generator for easier integration with
         Streamlit.
+
+        For reasoning models, this filters out thinking blocks to show only
+        the final answer.
         """
         try:
+            # Buffer for accumulating chunks to detect and filter thinking patterns
+            full_response = []
+            in_thinking_block = False
+            thinking_buffer = []
+
             # Use run_stream for chunk-based streaming
             # message_history parameter maintains conversation context
             async with agent.run_stream(
                 user_message, message_history=conversation_history
             ) as result:
-                # Track if we've seen any tool calls in the stream
-                # This helps us provide transparency about tool usage
-                tool_calls_detected = False
-
                 # Stream text chunks as they arrive from the model
-                # delta=False means we get full incremental updates, not just deltas
                 async for text_chunk in result.stream_text(delta=True):
-                    # Yield each chunk as it arrives for real-time display
-                    yield text_chunk
+                    # Accumulate the full response for post-processing
+                    full_response.append(text_chunk)
 
-                # After streaming completes, check if tools were used
-                # We can inspect the messages to detect tool usage
-                all_messages = result.all_messages()
+                    # Check for thinking block start
+                    combined_recent = ''.join(full_response[-10:])  # Look at recent chunks
+                    if re.search(r'<think(?:ing)?>|<[|]thinking[|]>', combined_recent, re.IGNORECASE):
+                        in_thinking_block = True
+                        thinking_buffer.append(text_chunk)
+                        continue
 
-                # Look for tool calls in the messages
-                for message in all_messages:
-                    # Check if this is a ModelResponse with tool calls
-                    if hasattr(message, "parts"):
-                        for part in message.parts:
-                            # Detect ToolCallPart indicating tool usage
-                            if part.__class__.__name__ == "ToolCallPart":
-                                if not tool_calls_detected:
-                                    tool_calls_detected = True
-                                    # Extract tool name for transparency
-                                    tool_name = getattr(part, "tool_name", "unknown")
-                                    # Note: Tool transparency should be in the agent's response
-                                    # per system instructions, but we log it here as backup
+                    # Check for thinking block end
+                    if in_thinking_block:
+                        thinking_buffer.append(text_chunk)
+                        if re.search(r'</think(?:ing)?>|</?[|]?end_thinking[|]>', combined_recent, re.IGNORECASE):
+                            in_thinking_block = False
+                            thinking_buffer = []
+                        continue
+
+                    # If not in thinking block, yield the chunk
+                    if not in_thinking_block:
+                        yield text_chunk
+
+                # After streaming completes, apply final filtering
+                # This catches any thinking patterns that weren't caught during streaming
+                final_text = ''.join(full_response)
+                filtered_text = filter_thinking_tokens(final_text)
+
+                # If filtering removed significant content, we may have missed some output
+                # Yield any remaining content that wasn't streamed
+                streamed_length = sum(len(chunk) for chunk in full_response) - sum(len(chunk) for chunk in thinking_buffer)
+                if len(filtered_text) > streamed_length:
+                    remaining = filtered_text[streamed_length:]
+                    if remaining.strip():
+                        yield remaining
 
         except ToolExecutionError as e:
             # Tool-specific errors (rate limit, invalid ticker, API failures)

@@ -21,7 +21,11 @@ from pydantic_ai.messages import (
     UserPromptPart,
 )
 
-from src.agent.streaming import stream_agent_response, stream_agent_response_async
+from src.agent.streaming import (
+    filter_thinking_tokens,
+    stream_agent_response,
+    stream_agent_response_async,
+)
 from src.utils.exceptions import ToolExecutionError
 
 
@@ -559,3 +563,155 @@ class TestStreamingIntegration:
         # Verify Unicode handling
         assert chunks == ["Price: ", "$150.25 ", "(USD)"]
         assert "".join(chunks) == "Price: $150.25 (USD)"
+
+
+class TestFilterThinkingTokens:
+    """Test suite for filter_thinking_tokens function for reasoning models."""
+
+    def test_filter_xml_think_tags(self):
+        """Test filtering of <think>...</think> XML-style tags."""
+        text = "<think>Let me calculate 2+2... equals 4</think>The answer is 4."
+        result = filter_thinking_tokens(text)
+        assert result == "The answer is 4."
+
+    def test_filter_xml_thinking_tags(self):
+        """Test filtering of <thinking>...</thinking> XML-style tags."""
+        text = "<thinking>I need to analyze this question carefully...</thinking>Here is my response."
+        result = filter_thinking_tokens(text)
+        assert result == "Here is my response."
+
+    def test_filter_pipe_thinking_tags(self):
+        """Test filtering of <|thinking|>...<|end_thinking|> format."""
+        text = "<|thinking|>Processing the request step by step<|end_thinking|>Final answer here."
+        result = filter_thinking_tokens(text)
+        assert result == "Final answer here."
+
+    def test_filter_multiple_thinking_blocks(self):
+        """Test filtering multiple thinking blocks in the same text."""
+        text = (
+            "<think>First thought</think>Some text<thinking>Second thought</thinking>More text"
+        )
+        result = filter_thinking_tokens(text)
+        assert result == "Some textMore text"
+
+    def test_filter_nested_thinking_content(self):
+        """Test filtering thinking blocks with nested/complex content."""
+        text = (
+            "<think>Let me think:\n1. First step\n2. Second step\n3. Conclusion</think>"
+            "The final answer is 42."
+        )
+        result = filter_thinking_tokens(text)
+        assert result == "The final answer is 42."
+
+    def test_filter_case_insensitive(self):
+        """Test filtering is case-insensitive for think/thinking tags."""
+        text = "<Think>Uppercase thinking</Think><THINKING>All caps</THINKING>Result"
+        result = filter_thinking_tokens(text)
+        assert result == "Result"
+
+    def test_filter_think_colon_pattern(self):
+        """Test filtering 'Think: ...' followed by 'Answer:' pattern."""
+        text = (
+            "Think: I need to calculate this carefully. Let me work through it step by step. "
+            "Answer: The result is 10."
+        )
+        result = filter_thinking_tokens(text)
+        # After filtering the "Think:" section, we should get the answer
+        assert "The result is 10" in result
+        assert "Think:" not in result or result.startswith("Answer:")
+
+    def test_no_thinking_blocks_unchanged(self):
+        """Test that text without thinking blocks remains unchanged."""
+        text = "This is a normal response with no thinking blocks."
+        result = filter_thinking_tokens(text)
+        assert result == text
+
+    def test_empty_string(self):
+        """Test filtering empty string."""
+        result = filter_thinking_tokens("")
+        assert result == ""
+
+    def test_only_thinking_blocks(self):
+        """Test text with only thinking blocks returns empty string."""
+        text = "<think>Only thinking here</think><thinking>More thinking</thinking>"
+        result = filter_thinking_tokens(text)
+        assert result == ""
+
+    def test_whitespace_handling(self):
+        """Test that leading/trailing whitespace is stripped."""
+        text = "  <think>Thinking...</think>  Result with spaces  "
+        result = filter_thinking_tokens(text)
+        assert result == "Result with spaces"
+
+    def test_multiline_thinking_blocks(self):
+        """Test filtering multiline thinking blocks."""
+        text = """<think>
+Let me think about this:
+- Point 1
+- Point 2
+- Conclusion
+</think>
+Final answer here."""
+        result = filter_thinking_tokens(text)
+        assert "Final answer here." in result
+        assert "Point 1" not in result
+        assert "Point 2" not in result
+
+    def test_mixed_thinking_formats(self):
+        """Test filtering mixed thinking block formats in one text."""
+        text = (
+            "<think>First format</think>"
+            "Some text"
+            "<|thinking|>Second format<|end_thinking|>"
+            "More text"
+            "<thinking>Third format</thinking>"
+            "Final result"
+        )
+        result = filter_thinking_tokens(text)
+        assert result == "Some textMore textFinal result"
+
+    def test_reasoning_pattern(self):
+        """Test filtering 'Reasoning:' followed by 'Answer:' pattern."""
+        text = "Reasoning: Step by step analysis goes here. Answer: The answer is yes."
+        result = filter_thinking_tokens(text)
+        # The regex should remove the reasoning section
+        assert "yes" in result
+
+    def test_preserves_legitimate_content(self):
+        """Test that legitimate content is preserved even with similar patterns."""
+        # This should NOT be filtered (no closing tag)
+        text = "Let's think about this problem. The solution is X."
+        result = filter_thinking_tokens(text)
+        # Since there's no actual thinking block, text should remain
+        assert "Let's think about this problem" in result
+        assert "The solution is X" in result
+
+    def test_qwen3_realistic_output(self):
+        """Test realistic qwen3:8b model output with thinking blocks."""
+        # Simulated output from qwen3:8b reasoning model
+        text = """<think>
+The user is asking about Apple's stock price. I need to:
+1. Convert "Apple" to ticker symbol "AAPL"
+2. Use the finance tool to fetch the data
+3. Format the response clearly
+</think>I'm using the finance tool to fetch the latest stock price for AAPL...
+
+The current stock price of Apple (AAPL) is $150.25 USD."""
+
+        result = filter_thinking_tokens(text)
+
+        # Verify thinking block is removed
+        assert "Convert" not in result
+        assert "ticker symbol" not in result
+
+        # Verify actual response is preserved
+        assert "using the finance tool" in result
+        assert "$150.25" in result
+        assert "AAPL" in result
+
+    def test_deepseek_r1_format(self):
+        """Test DeepSeek-R1 style thinking format."""
+        text = "<|thinking|>Let me analyze this query...</|end_thinking|>Here is the answer."
+        result = filter_thinking_tokens(text)
+        assert result == "Here is the answer."
+        assert "analyze" not in result
