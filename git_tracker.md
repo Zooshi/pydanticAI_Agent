@@ -10,3 +10,4 @@ This file tracks all commits made during the development of the PydanticAI Strea
 - 2025-12-27 (Task #3) - feat: Install project dependencies and verify installation (latest versions)
 - 2025-12-27 11:00 - feat: Setup project structure with src/ directory organization
 - 2025-12-27 (Task #5) - feat: Implement thread-safe sliding window rate limiter with 19 unit tests
+- 2025-12-27 (Task #6) - feat: Implement centralized custom exception hierarchy
