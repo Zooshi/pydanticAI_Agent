@@ -9,7 +9,7 @@ Constants:
     TAVILY_API_KEY: API key for Tavily research tool (required)
     LOGFIRE_TOKEN: Token for LogFire observability (required)
     OLLAMA_BASE_URL: Base URL for OLLAMA API (default: http://localhost:11434)
-    OLLAMA_MODEL_NAME: Model name for OLLAMA (default: qwen2.5:3b)
+    OLLAMA_MODEL_NAME: Model name for OLLAMA (default: qwen3:8b)
     MAX_TICKER_LOOKUPS_PER_MINUTE: Rate limit for YFinance ticker lookups (default: 10)
 
 Example:
@@ -45,7 +45,7 @@ LOGFIRE_TOKEN: Optional[str] = os.getenv("LOGFIRE_TOKEN")
 
 # OLLAMA Configuration
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL_NAME: str = os.getenv("OLLAMA_MODEL_NAME", "qwen2.5:3b")
+OLLAMA_MODEL_NAME: str = os.getenv("OLLAMA_MODEL_NAME", "qwen3:8b")
 
 # Rate Limiting Configuration
 MAX_TICKER_LOOKUPS_PER_MINUTE: int = int(
@@ -114,7 +114,7 @@ def validate_config(model: str) -> None:
         if not OLLAMA_MODEL_NAME:
             raise ConfigurationError(
                 "OLLAMA_MODEL_NAME environment variable is required for OLLAMA model. "
-                "Default: qwen2.5:3b"
+                "Default: qwen3:8b"
             )
 
     # Validate rate limit configuration

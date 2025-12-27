@@ -9,7 +9,6 @@ and comprehensive error handling for a robust user experience.
 """
 
 import streamlit as st
-from pydantic_ai.messages import ModelMessage
 
 from src.agent.financial_agent import create_agent
 from src.agent.streaming import stream_agent_response
@@ -58,7 +57,7 @@ def render_sidebar() -> str:
         model_option = st.selectbox(
             "Select Model",
             options=[
-                "OLLAMA (qwen2.5:3b)",
+                "OLLAMA (qwen3:8b)",
                 "OpenAI (gpt-4o-mini)"
             ],
             index=0 if st.session_state.model_choice == "ollama" else 1,
@@ -95,10 +94,10 @@ def render_chat_history() -> None:
 
 def convert_to_pydantic_history(
     streamlit_messages: list[dict[str, str]]
-) -> list[ModelMessage]:
+) -> list[dict[str, str]]:
     """Convert Streamlit message history to PydanticAI format.
 
-    PydanticAI expects conversation history as a list of ModelMessage objects
+    PydanticAI expects conversation history as a list of message dictionaries
     with specific role naming conventions. This function transforms the Streamlit
     message format to the PydanticAI format.
 
@@ -107,7 +106,7 @@ def convert_to_pydantic_history(
             and "content" keys from Streamlit session state.
 
     Returns:
-        List of ModelMessage objects for PydanticAI agent. Roles are converted:
+        List of message dicts for PydanticAI agent. Roles are converted:
         - "user" -> "user" (no change)
         - "assistant" -> "model" (PydanticAI convention)
 
@@ -123,13 +122,11 @@ def convert_to_pydantic_history(
         # Convert assistant role to model role for PydanticAI
         pydantic_role = "model" if role == "assistant" else role
 
-        # Create ModelMessage with converted role
-        model_message = ModelMessage(
-            role=pydantic_role,
-            content=content,
-        )
-
-        pydantic_history.append(model_message)
+        # Create message dict with converted role
+        pydantic_history.append({
+            "role": pydantic_role,
+            "content": content,
+        })
 
     return pydantic_history
 

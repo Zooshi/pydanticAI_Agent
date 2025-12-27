@@ -79,7 +79,7 @@ def create_agent(model_choice: str) -> Agent:
 
     Args:
         model_choice: Model to use. Must be "ollama" or "openai".
-            - "ollama": Uses local OLLAMA model (qwen2.5:3b) via OLLAMA_BASE_URL
+            - "ollama": Uses local OLLAMA model (qwen3:8b) via OLLAMA_BASE_URL
             - "openai": Uses OpenAI's gpt-4o-mini model via OpenAI API
 
     Returns:
@@ -133,7 +133,7 @@ def create_agent(model_choice: str) -> Agent:
         if not OLLAMA_MODEL_NAME:
             raise ConfigurationError(
                 "OLLAMA_MODEL_NAME is required for OLLAMA model. "
-                "Please set it in your .env file (default: qwen2.5:3b)."
+                "Please set it in your .env file (default: qwen3:8b)."
             )
 
         # PydanticAI model string format: "ollama:<model_name>"
