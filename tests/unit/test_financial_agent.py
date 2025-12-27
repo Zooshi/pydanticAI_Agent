@@ -81,14 +81,22 @@ class TestCreateAgentOllama(unittest.TestCase):
 
     @patch("src.agent.financial_agent.logfire")
     @patch("src.agent.financial_agent.Agent")
+    @patch("src.agent.financial_agent.OpenAIChatModel")
+    @patch("src.agent.financial_agent.OllamaProvider")
     @patch("src.agent.financial_agent.LOGFIRE_TOKEN", "test-logfire-token")
     @patch("src.agent.financial_agent.OLLAMA_BASE_URL", "http://localhost:11434")
-    @patch("src.agent.financial_agent.OLLAMA_MODEL_NAME", "qwen2.5:3b")
-    def test_create_agent_ollama_success(self, mock_agent_class, mock_logfire):
+    @patch("src.agent.financial_agent.OLLAMA_MODEL_NAME", "qwen3:8b")
+    def test_create_agent_ollama_success(
+        self, mock_ollama_provider_class, mock_openai_model_class, mock_agent_class, mock_logfire
+    ):
         """Test successful OLLAMA agent creation."""
         # Mock Agent instance
         mock_agent_instance = MagicMock()
         mock_agent_class.return_value = mock_agent_instance
+        mock_model_instance = MagicMock()
+        mock_openai_model_class.return_value = mock_model_instance
+        mock_provider_instance = MagicMock()
+        mock_ollama_provider_class.return_value = mock_provider_instance
 
         # Create agent
         agent = create_agent("ollama")
@@ -96,9 +104,18 @@ class TestCreateAgentOllama(unittest.TestCase):
         # Verify LogFire configuration
         mock_logfire.configure.assert_called_once_with(token="test-logfire-token")
 
-        # Verify Agent initialization
+        # Verify OllamaProvider created with correct base_url (with /v1 suffix)
+        mock_ollama_provider_class.assert_called_once_with(base_url="http://localhost:11434/v1")
+
+        # Verify OpenAIChatModel created with correct model name and provider
+        mock_openai_model_class.assert_called_once_with(
+            model_name="qwen3:8b",
+            provider=mock_provider_instance,
+        )
+
+        # Verify Agent initialization with OpenAIChatModel instance
         mock_agent_class.assert_called_once_with(
-            "ollama:qwen2.5:3b",
+            mock_model_instance,
             system_prompt=SYSTEM_INSTRUCTIONS,
         )
 
@@ -109,26 +126,32 @@ class TestCreateAgentOllama(unittest.TestCase):
         mock_logfire.info.assert_called_once()
         log_call_kwargs = mock_logfire.info.call_args[1]
         assert log_call_kwargs["model_choice"] == "ollama"
-        assert log_call_kwargs["model_string"] == "ollama:qwen2.5:3b"
+        assert log_call_kwargs["model_string"] == "ollama:qwen3:8b"
         assert "finance_tool" in log_call_kwargs["tools"]
         assert "research_tool" in log_call_kwargs["tools"]
 
     @patch("src.agent.financial_agent.logfire")
     @patch("src.agent.financial_agent.Agent")
+    @patch("src.agent.financial_agent.OpenAIChatModel")
+    @patch("src.agent.financial_agent.OllamaProvider")
     @patch("src.agent.financial_agent.LOGFIRE_TOKEN", "test-token")
     @patch("src.agent.financial_agent.OLLAMA_BASE_URL", "http://localhost:11434")
-    @patch("src.agent.financial_agent.OLLAMA_MODEL_NAME", "qwen2.5:3b")
-    def test_create_agent_ollama_case_insensitive(self, mock_agent_class, mock_logfire):
+    @patch("src.agent.financial_agent.OLLAMA_MODEL_NAME", "qwen3:8b")
+    def test_create_agent_ollama_case_insensitive(
+        self, mock_ollama_provider_class, mock_openai_model_class, mock_agent_class, mock_logfire
+    ):
         """Test OLLAMA agent creation with uppercase model choice."""
         mock_agent_instance = MagicMock()
         mock_agent_class.return_value = mock_agent_instance
+        mock_model_instance = MagicMock()
+        mock_openai_model_class.return_value = mock_model_instance
 
         # Create agent with uppercase
         agent = create_agent("OLLAMA")
 
-        # Verify Agent initialization with correct model string
+        # Verify Agent initialization with OpenAIChatModel instance
         mock_agent_class.assert_called_once_with(
-            "ollama:qwen2.5:3b",
+            mock_model_instance,
             system_prompt=SYSTEM_INSTRUCTIONS,
         )
 

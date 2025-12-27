@@ -126,20 +126,47 @@ def stream_agent_response(
             # Provide clear error message for debugging
             yield f"\n\nStreaming error: {str(e)}"
 
-    # Run the async generator in a new event loop and yield results synchronously
-    # This bridges async streaming with Streamlit's sync interface
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        async_gen = _async_stream()
-        while True:
-            try:
-                chunk = loop.run_until_complete(async_gen.__anext__())
-                yield chunk
-            except StopAsyncIteration:
-                break
-    finally:
-        loop.close()
+    # Run the async generator using asyncio.run() with proper lifecycle management
+    # We need to wrap the entire async iteration in a single asyncio.run() call
+    # to avoid task/cancel scope violations
+
+    # Create a wrapper that yields chunks through a queue-like mechanism
+    import queue
+    import threading
+
+    chunk_queue = queue.Queue()
+    exception_holder = []
+
+    def run_async_stream():
+        """Run the async stream in a separate thread with its own event loop."""
+        try:
+            async def _stream_to_queue():
+                async for chunk in _async_stream():
+                    chunk_queue.put(chunk)
+                chunk_queue.put(None)  # Sentinel to indicate completion
+
+            asyncio.run(_stream_to_queue())
+        except Exception as e:
+            exception_holder.append(e)
+            chunk_queue.put(None)
+
+    # Start the async streaming in a background thread
+    thread = threading.Thread(target=run_async_stream, daemon=True)
+    thread.start()
+
+    # Yield chunks as they arrive in the queue
+    while True:
+        chunk = chunk_queue.get()
+        if chunk is None:  # Sentinel value indicates stream is complete
+            break
+        yield chunk
+
+    # Wait for thread to complete
+    thread.join(timeout=1.0)
+
+    # Re-raise any exceptions that occurred in the async stream
+    if exception_holder:
+        raise exception_holder[0]
 
 
 async def stream_agent_response_async(

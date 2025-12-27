@@ -26,6 +26,8 @@ from typing import Any
 
 import logfire
 from pydantic_ai import Agent, RunContext
+from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.providers.ollama import OllamaProvider
 
 from src.config import LOGFIRE_TOKEN, OLLAMA_BASE_URL, OLLAMA_MODEL_NAME
 from src.tools.finance_tool import get_stock_price
@@ -121,7 +123,7 @@ def create_agent(model_choice: str) -> Agent:
     # Configure LogFire for observability
     logfire.configure(token=LOGFIRE_TOKEN)
 
-    # Determine model string based on choice
+    # Determine model based on choice
     if model_choice_lower == "ollama":
         # Validate OLLAMA configuration
         if not OLLAMA_BASE_URL:
@@ -136,23 +138,30 @@ def create_agent(model_choice: str) -> Agent:
                 "Please set it in your .env file (default: qwen3:8b)."
             )
 
-        # PydanticAI model string format: "ollama:<model_name>"
-        model_string = f"ollama:{OLLAMA_MODEL_NAME}"
+        # OLLAMA uses OpenAI-compatible API via OllamaProvider
+        # The base_url must include /v1 suffix for OpenAI compatibility
+        ollama_base_url = OLLAMA_BASE_URL
+        if not ollama_base_url.endswith('/v1'):
+            ollama_base_url = f"{ollama_base_url}/v1"
 
-        # Note: OLLAMA_BASE_URL is used via environment variable OLLAMA_BASE_URL
-        # PydanticAI's ollama integration automatically reads this
+        model = OpenAIChatModel(
+            model_name=OLLAMA_MODEL_NAME,
+            provider=OllamaProvider(base_url=ollama_base_url),
+        )
+        model_string = f"ollama:{OLLAMA_MODEL_NAME}"
 
     else:  # openai
         # PydanticAI model string format: "openai:<model_name>"
         # Using gpt-4o-mini as specified in requirements
         model_string = "openai:gpt-4o-mini"
+        model = model_string  # Agent accepts string for standard providers
 
         # Note: OPENAI_API_KEY is used via environment variable
         # PydanticAI's openai integration automatically reads this
 
     # Create agent with system instructions
     agent = Agent(
-        model_string,
+        model,
         system_prompt=SYSTEM_INSTRUCTIONS,
     )
 
