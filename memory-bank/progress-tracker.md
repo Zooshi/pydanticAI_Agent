@@ -2,8 +2,8 @@
 
 ## Status
 - **Total Tickets:** 15
-- **Completed:** 4
-- **Pending:** 11
+- **Completed:** 5
+- **Pending:** 10
 
 ## Implementation Backlog (Ordered)
 
@@ -19,7 +19,7 @@
 
 ### Phase 2: Core Utilities
 
-- [ ] **[Utility] Rate Limiter Implementation**: Create utils/rate_limiter.py with RateLimiter class using sliding window algorithm (10 requests per 60 seconds), implement check_and_record() method that raises RateLimitExceededError when limit exceeded, ensure thread-safe implementation, create custom exception RateLimitExceededError in utils/exceptions.py, and write unit tests in tests/unit/test_rate_limiter.py (test normal flow, test limit exceeded, test window reset).
+- [x] **[Utility] Rate Limiter Implementation**: Create utils/rate_limiter.py with RateLimiter class using sliding window algorithm (10 requests per 60 seconds), implement check_and_record() method that raises RateLimitExceededError when limit exceeded, ensure thread-safe implementation, create custom exception RateLimitExceededError in utils/exceptions.py, and write unit tests in tests/unit/test_rate_limiter.py (test normal flow, test limit exceeded, test window reset).
 
 - [ ] **[Utility] Custom Exceptions**: Create utils/exceptions.py with custom exception classes (RateLimitExceededError, ToolExecutionError, ConfigurationError), add docstrings explaining when each exception should be raised, and write unit tests in tests/unit/test_exceptions.py.
 
@@ -61,6 +61,8 @@
 - **[Setup] Dependencies Installation**: Created requirements.txt with latest package versions (streamlit 1.52.2, pydantic-ai 1.39.0, yfinance 1.0, openai 2.14.0, tavily-python 0.7.17, logfire 4.16.0, plus testing and code quality tools). All dependencies installed successfully in daniel venv. Created and executed verify_installation.py script - all 12 core packages imported successfully. Note: Minor warning about Pydantic V1 compatibility with Python 3.14 in cohere library (non-blocking).
 
 - **[Setup] Project Structure**: Created src/ directory structure with agent/, tools/, and utils/ subdirectories. Moved config.py from project root to src/config.py (updated .env path resolution to look in parent directory). Created __init__.py files for all packages (src/, src/agent/, src/tools/, src/utils/) with descriptive docstrings. Updated tests/unit/test_config.py to import from src.config instead of config. Created test_imports.py verification script - all 8 import tests passing. Verified all 17 unit tests still pass with new import paths. Removed old config.py from root directory. Final structure matches technical-context.md specification with clean package organization.
+
+- **[Utility] Rate Limiter Implementation**: Created src/utils/rate_limiter.py with sliding window algorithm implementation. Implemented RateLimiter class with thread-safe operations using threading.Lock and deque for efficient timestamp management. Supports configurable rate limits (default 10 requests per 60 seconds). Includes RateLimitExceededError exception with clear error messages showing wait time. Implements check_and_record(), get_remaining_requests(), and reset_time() methods. Created comprehensive unit tests in tests/unit/test_rate_limiter.py with 19 test cases covering initialization, basic functionality, sliding window behavior, thread safety, and edge cases. All tests passing. Rate limiter uses <= comparison for window boundary to correctly expire timestamps at exact boundaries.
 
 ## Known Issues
 _None yet. Issues will be logged here as they are discovered during implementation._

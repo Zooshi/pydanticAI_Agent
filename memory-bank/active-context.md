@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Session Focus
-**Task:** [Setup] Project Structure (Task #4 from progress-tracker.md) - COMPLETED
+**Task:** [Utility] Rate Limiter Implementation (Task #5 from progress-tracker.md) - COMPLETED
 
 ## Recent Changes
 
@@ -219,6 +219,53 @@ src/
 - Structure matches technical-context.md specification exactly
 - Ready for Phase 2 implementation (Rate Limiter and Custom Exceptions)
 
+### 2025-12-27 - Rate Limiter Implementation
+**Status:** COMPLETED
+
+**Completed:**
+- Created src/utils/rate_limiter.py with thread-safe sliding window rate limiter:
+  - RateLimiter class with configurable limits (default 10 requests per 60 seconds)
+  - RateLimitExceededError exception defined in same file
+  - Thread-safe implementation using threading.Lock and deque
+  - Sliding window algorithm with <= comparison for boundary expiration
+  - Methods:
+    - check_and_record(): Validates and records request, raises exception if limit exceeded
+    - get_remaining_requests(): Returns number of remaining allowed requests
+    - reset_time(): Clears all timestamps (for testing)
+  - Clear error messages with wait time calculation
+  - Full type hints and Google-style docstrings
+  - No Unicode characters (Windows compatibility)
+
+- Created comprehensive unit tests (tests/unit/test_rate_limiter.py):
+  - TestRateLimiterInitialization: 4 test cases (defaults, custom values, validation)
+  - TestRateLimiterBasicFunctionality: 6 test cases (under limit, exceeding limit, remaining count)
+  - TestRateLimiterSlidingWindow: 3 test cases (expiration, partial expiration, mocked time)
+  - TestRateLimiterThreadSafety: 2 test cases (concurrent requests, thread-safe remaining count)
+  - TestRateLimiterResetAndEdgeCases: 4 test cases (reset, single request limit, wait time accuracy, boundary)
+  - Total: 19 test cases, all passing
+  - Covers: initialization, basic limiting, sliding window, thread safety, edge cases
+
+**Test Results:**
+- All 19 unit tests passing
+- Test execution time: 6.30s
+- Command used: python -m pytest tests/unit/test_rate_limiter.py -v
+
+**Files Created:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\src\utils\rate_limiter.py
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\tests\unit\test_rate_limiter.py
+
+**Files Modified:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\progress-tracker.md
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\active-context.md
+
+**Implementation Notes:**
+- RateLimitExceededError defined in rate_limiter.py (per task requirements, will refactor to separate exceptions.py in Task #6)
+- Uses deque for O(1) timestamp removal from front
+- Thread-safe with Lock protecting all timestamp operations
+- Boundary condition: Uses <= to expire timestamps at exact window edge
+- Wait time calculation ensures non-negative values
+- reset_time() method included specifically for testing purposes
+
 **Next Task:**
-- Task #5: [Utility] Rate Limiter Implementation
-- Will create src/utils/rate_limiter.py and src/utils/exceptions.py
+- Task #6: [Utility] Custom Exceptions
+- Will create src/utils/exceptions.py and move RateLimitExceededError there, along with ToolExecutionError and ConfigurationError
