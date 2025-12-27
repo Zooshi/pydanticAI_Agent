@@ -13,3 +13,4 @@ This file tracks all commits made during the development of the PydanticAI Strea
 - 2025-12-27 (Task #6) - feat: Implement centralized custom exception hierarchy
 - 2025-12-27 (Task #7) - feat: Implement YFinance finance tool with rate limiting and comprehensive error handling
 - 2025-12-27 (Task #8) - feat: Implement Tavily Research Tool with comprehensive tests
+- 2025-12-27 (Task #9) - feat: Implement PydanticAI agent core with dual-model support
