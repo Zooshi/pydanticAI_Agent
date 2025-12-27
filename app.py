@@ -147,7 +147,20 @@ def handle_user_input() -> None:
     - ToolExecutionError: Tool failures (YFinance, Tavily)
     - Generic exceptions: Unexpected errors with full trace
     """
+    # Security: Maximum prompt length to prevent resource exhaustion
+    MAX_PROMPT_LENGTH = 2000
+
     if prompt := st.chat_input("Ask about stocks or companies..."):
+        # Security: Validate and sanitize user input
+        prompt = prompt.strip()
+
+        if len(prompt) < 1:
+            return
+
+        if len(prompt) > MAX_PROMPT_LENGTH:
+            st.error(f"Input too long (maximum {MAX_PROMPT_LENGTH} characters)")
+            return
+
         # Add user message to history
         st.session_state.messages.append({"role": "user", "content": prompt})
 
@@ -214,11 +227,12 @@ def handle_user_input() -> None:
 
             except Exception as e:
                 # Catch-all for unexpected errors
-                error_msg = f"An unexpected error occurred: {str(e)}"
+                error_msg = "An unexpected error occurred. Please try again or contact support."
                 st.error(error_msg)
 
-                # Show full stack trace for debugging
-                st.exception(e)
+                # Security: Log full details to LogFire instead of exposing to user
+                import logfire
+                logfire.error("unexpected_ui_error", error=str(e), error_type=type(e).__name__)
 
                 # Add error to history
                 st.session_state.messages.append(

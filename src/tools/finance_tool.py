@@ -55,6 +55,8 @@ def get_stock_price(ticker: str) -> dict[str, Any]:
         >>> print(f"Current price: ${data['current_price']}")
         Current price: $150.25
     """
+    import re
+
     # Validate ticker format
     if not ticker or not isinstance(ticker, str):
         raise ToolExecutionError(
@@ -69,6 +71,15 @@ def get_stock_price(ticker: str) -> dict[str, Any]:
     if len(ticker) > 10:
         raise ToolExecutionError(
             f"Invalid ticker format: ticker '{ticker}' exceeds maximum length of 10 characters"
+        )
+
+    # Security: Strict regex validation for ticker format
+    # Allows 1-5 letters, optionally followed by dot and 1-2 letters (for exchanges)
+    TICKER_PATTERN = re.compile(r'^[A-Z]{1,10}(?:\.[A-Z]{1,2})?$')
+    if not TICKER_PATTERN.match(ticker):
+        raise ToolExecutionError(
+            f"Invalid ticker format: '{ticker}' contains invalid characters. "
+            "Valid format: 1-10 uppercase letters, optionally followed by .XX for exchange"
         )
 
     # Check rate limit before making API call

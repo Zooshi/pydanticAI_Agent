@@ -31,4 +31,4 @@ flake8==7.3.0
 mypy==1.19.1
 
 # Supporting Libraries
-requests==2.32.3
+requests==2.32.5  # Security fix: CVE-2024-47081 (credential leak)
