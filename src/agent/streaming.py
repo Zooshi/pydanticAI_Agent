@@ -26,6 +26,7 @@ import re
 from collections.abc import AsyncGenerator, Generator
 from typing import Any
 
+import logfire
 from pydantic_ai import Agent
 from pydantic_ai.messages import ModelMessage
 
@@ -89,6 +90,9 @@ def stream_agent_response(
     Error handling is built-in: if streaming fails at any point, an error
     message is yielded instead of crashing the application.
 
+    Logfire tracing is integrated to capture the full conversation (user prompt
+    + complete response) rather than individual chunks.
+
     Args:
         agent: Configured PydanticAI Agent instance (created via create_agent()).
         user_message: The user's input message to send to the agent.
@@ -129,62 +133,92 @@ def stream_agent_response(
 
         For reasoning models, this filters out thinking blocks to show only
         the final answer.
+
+        Logfire tracing captures the complete conversation (user prompt + full response).
         """
-        try:
-            # Buffer for accumulating chunks to detect and filter thinking patterns
-            full_response = []
-            in_thinking_block = False
-            thinking_buffer = []
+        # Start a Logfire span to trace the entire conversation
+        with logfire.span(
+            "agent_conversation",
+            user_prompt=user_message,
+            conversation_history_length=len(conversation_history)
+        ):
+            try:
+                # Buffer for accumulating chunks to detect and filter thinking patterns
+                full_response = []
+                in_thinking_block = False
+                thinking_buffer = []
 
-            # Use run_stream for chunk-based streaming
-            # message_history parameter maintains conversation context
-            async with agent.run_stream(
-                user_message, message_history=conversation_history
-            ) as result:
-                # Stream text chunks as they arrive from the model
-                async for text_chunk in result.stream_text(delta=True):
-                    # Accumulate the full response for post-processing
-                    full_response.append(text_chunk)
+                # Use run_stream for chunk-based streaming
+                # message_history parameter maintains conversation context
+                async with agent.run_stream(
+                    user_message, message_history=conversation_history
+                ) as result:
+                    # Stream text chunks as they arrive from the model
+                    async for text_chunk in result.stream_text(delta=True):
+                        # Accumulate the full response for post-processing
+                        full_response.append(text_chunk)
 
-                    # Check for thinking block start
-                    combined_recent = ''.join(full_response[-10:])  # Look at recent chunks
-                    if re.search(r'<think(?:ing)?>|<[|]thinking[|]>', combined_recent, re.IGNORECASE):
-                        in_thinking_block = True
-                        thinking_buffer.append(text_chunk)
-                        continue
+                        # Check for thinking block start
+                        combined_recent = ''.join(full_response[-10:])  # Look at recent chunks
+                        if re.search(r'<think(?:ing)?>|<[|]thinking[|]>', combined_recent, re.IGNORECASE):
+                            in_thinking_block = True
+                            thinking_buffer.append(text_chunk)
+                            continue
 
-                    # Check for thinking block end
-                    if in_thinking_block:
-                        thinking_buffer.append(text_chunk)
-                        if re.search(r'</think(?:ing)?>|</?[|]?end_thinking[|]>', combined_recent, re.IGNORECASE):
-                            in_thinking_block = False
-                            thinking_buffer = []
-                        continue
+                        # Check for thinking block end
+                        if in_thinking_block:
+                            thinking_buffer.append(text_chunk)
+                            if re.search(r'</think(?:ing)?>|</?[|]?end_thinking[|]>', combined_recent, re.IGNORECASE):
+                                in_thinking_block = False
+                                thinking_buffer = []
+                            continue
 
-                    # If not in thinking block, yield the chunk
-                    if not in_thinking_block:
-                        yield text_chunk
+                        # If not in thinking block, yield the chunk
+                        if not in_thinking_block:
+                            yield text_chunk
 
-                # After streaming completes, apply final filtering
-                # This catches any thinking patterns that weren't caught during streaming
-                final_text = ''.join(full_response)
-                filtered_text = filter_thinking_tokens(final_text)
+                    # After streaming completes, apply final filtering
+                    # This catches any thinking patterns that weren't caught during streaming
+                    final_text = ''.join(full_response)
+                    filtered_text = filter_thinking_tokens(final_text)
 
-                # If filtering removed significant content, we may have missed some output
-                # Yield any remaining content that wasn't streamed
-                streamed_length = sum(len(chunk) for chunk in full_response) - sum(len(chunk) for chunk in thinking_buffer)
-                if len(filtered_text) > streamed_length:
-                    remaining = filtered_text[streamed_length:]
-                    if remaining.strip():
-                        yield remaining
+                    # If filtering removed significant content, we may have missed some output
+                    # Yield any remaining content that wasn't streamed
+                    streamed_length = sum(len(chunk) for chunk in full_response) - sum(len(chunk) for chunk in thinking_buffer)
+                    if len(filtered_text) > streamed_length:
+                        remaining = filtered_text[streamed_length:]
+                        if remaining.strip():
+                            yield remaining
 
-        except ToolExecutionError as e:
-            # Tool-specific errors (rate limit, invalid ticker, API failures)
-            yield f"\n\nError: {str(e)}"
-        except Exception as e:
-            # Catch-all for any other streaming errors
-            # Provide clear error message for debugging
-            yield f"\n\nStreaming error: {str(e)}"
+                    # Log the complete conversation to Logfire
+                    logfire.info(
+                        "conversation_completed",
+                        user_prompt=user_message,
+                        agent_response=filtered_text,
+                        response_length=len(filtered_text),
+                        chunks_count=len(full_response),
+                        thinking_filtered=len(thinking_buffer) > 0
+                    )
+
+            except ToolExecutionError as e:
+                # Tool-specific errors (rate limit, invalid ticker, API failures)
+                error_msg = f"\n\nError: {str(e)}"
+                logfire.error(
+                    "tool_execution_error",
+                    user_prompt=user_message,
+                    error=str(e)
+                )
+                yield error_msg
+            except Exception as e:
+                # Catch-all for any other streaming errors
+                # Provide clear error message for debugging
+                error_msg = f"\n\nStreaming error: {str(e)}"
+                logfire.error(
+                    "streaming_error",
+                    user_prompt=user_message,
+                    error=str(e)
+                )
+                yield error_msg
 
     # Run the async generator using asyncio.run() with proper lifecycle management
     # We need to wrap the entire async iteration in a single asyncio.run() call
@@ -240,6 +274,9 @@ async def stream_agent_response_async(
     returns an async generator for use in async/await code. It's useful for
     integration with async web frameworks or when called from async code.
 
+    Logfire tracing is integrated to capture the full conversation (user prompt
+    + complete response) rather than individual chunks.
+
     Args:
         agent: Configured PydanticAI Agent instance (created via create_agent()).
         user_message: The user's input message to send to the agent.
@@ -262,21 +299,54 @@ async def stream_agent_response_async(
         Using finance tool to fetch stock data...
         The current stock price for Apple (AAPL) is $150.25 USD.
     """
-    try:
-        # Use run_stream for chunk-based streaming
-        async with agent.run_stream(
-            user_message, message_history=conversation_history
-        ) as result:
-            # Stream text chunks as they arrive from the model
-            # delta=True means we get only the new content, not cumulative
-            async for text_chunk in result.stream_text(delta=True):
-                # Yield each chunk as it arrives for real-time display
-                yield text_chunk
+    # Start a Logfire span to trace the entire conversation
+    with logfire.span(
+        "agent_conversation_async",
+        user_prompt=user_message,
+        conversation_history_length=len(conversation_history)
+    ):
+        try:
+            # Buffer to accumulate complete response for Logfire
+            full_response = []
 
-    except ToolExecutionError as e:
-        # Tool-specific errors (rate limit, invalid ticker, API failures)
-        yield f"\n\nError: {str(e)}"
-    except Exception as e:
-        # Catch-all for any other streaming errors
-        # Provide clear error message for debugging
-        yield f"\n\nStreaming error: {str(e)}"
+            # Use run_stream for chunk-based streaming
+            async with agent.run_stream(
+                user_message, message_history=conversation_history
+            ) as result:
+                # Stream text chunks as they arrive from the model
+                # delta=True means we get only the new content, not cumulative
+                async for text_chunk in result.stream_text(delta=True):
+                    # Accumulate for complete response logging
+                    full_response.append(text_chunk)
+                    # Yield each chunk as it arrives for real-time display
+                    yield text_chunk
+
+                # Log the complete conversation to Logfire
+                complete_response = ''.join(full_response)
+                logfire.info(
+                    "conversation_completed",
+                    user_prompt=user_message,
+                    agent_response=complete_response,
+                    response_length=len(complete_response),
+                    chunks_count=len(full_response)
+                )
+
+        except ToolExecutionError as e:
+            # Tool-specific errors (rate limit, invalid ticker, API failures)
+            error_msg = f"\n\nError: {str(e)}"
+            logfire.error(
+                "tool_execution_error",
+                user_prompt=user_message,
+                error=str(e)
+            )
+            yield error_msg
+        except Exception as e:
+            # Catch-all for any other streaming errors
+            # Provide clear error message for debugging
+            error_msg = f"\n\nStreaming error: {str(e)}"
+            logfire.error(
+                "streaming_error",
+                user_prompt=user_message,
+                error=str(e)
+            )
+            yield error_msg

@@ -21,3 +21,5 @@ This file tracks all commits made during the development of the PydanticAI Strea
 - 2025-12-27 (Bugfix) - fix: Resolve streaming and OLLAMA configuration issues (946e153)
 - 2025-12-27 (Feature) - feat: Add thinking token filter for reasoning models (qwen3, DeepSeek-R1) with 17 unit tests (5a7edb9)
 - 2025-12-27 (Feature) - feat: Add Pydantic instrumentation to LogFire observability (c7fd956)
+- 2025-12-27 (Refactor) - refactor: Remove Pydantic instrumentation to reduce LogFire log noise (4c9b371)
+- 2025-12-27 (Test) - test: Add LogFire integration verification script (3d437c4)
