@@ -122,7 +122,8 @@ def create_agent(model_choice: str) -> Agent:
 
     # Configure LogFire for observability
     logfire.configure(token=LOGFIRE_TOKEN)
-    logfire.instrument_pydantic()
+    # Note: Pydantic instrumentation removed to reduce log noise
+    # Only conversation-level events are logged (see streaming.py)
     # Determine model based on choice
     if model_choice_lower == "ollama":
         # Validate OLLAMA configuration
