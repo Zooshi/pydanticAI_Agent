@@ -23,3 +23,4 @@ This file tracks all commits made during the development of the PydanticAI Strea
 - 2025-12-27 (Feature) - feat: Add Pydantic instrumentation to LogFire observability (c7fd956)
 - 2025-12-27 (Refactor) - refactor: Remove Pydantic instrumentation to reduce LogFire log noise (4c9b371)
 - 2025-12-27 (Test) - test: Add LogFire integration verification script (3d437c4)
+- 2025-12-27 (Security) - security: Comprehensive security audit and fixes (input validation, dependency upgrade, documentation) (3c54572)
