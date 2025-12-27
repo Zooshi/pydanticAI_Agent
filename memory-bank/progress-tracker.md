@@ -2,8 +2,8 @@
 
 ## Status
 - **Total Tickets:** 15
-- **Completed:** 8
-- **Pending:** 7
+- **Completed:** 9
+- **Pending:** 6
 
 ## Implementation Backlog (Ordered)
 
@@ -31,7 +31,7 @@
 
 ### Phase 4: Agent Layer
 
-- [ ] **[Agent] PydanticAI Agent Core**: Create agent/core.py with create_agent(model_name: str) function, implement agent initialization for both OLLAMA (qwen3:8b) and OpenAI (gpt-4.1-mini) models, define system prompt with explicit ticker conversion instructions (AI must determine ticker from company name, no hardcoded mappings, must mention tool usage in responses), register finance_tool and research_tool with PydanticAI agent, integrate LogFire tracking for all agent interactions, implement streaming configuration (chunk-based, not token-level), add error handling for model initialization failures, and write integration tests in tests/integration/test_agent_tools.py with mocked tools (test agent initialization both models, test tool registration, test system prompt behavior).
+- [x] **[Agent] PydanticAI Agent Core**: Create agent/core.py with create_agent(model_name: str) function, implement agent initialization for both OLLAMA (qwen3:8b) and OpenAI (gpt-4.1-mini) models, define system prompt with explicit ticker conversion instructions (AI must determine ticker from company name, no hardcoded mappings, must mention tool usage in responses), register finance_tool and research_tool with PydanticAI agent, integrate LogFire tracking for all agent interactions, implement streaming configuration (chunk-based, not token-level), add error handling for model initialization failures, and write integration tests in tests/integration/test_agent_tools.py with mocked tools (test agent initialization both models, test tool registration, test system prompt behavior).
 
 - [ ] **[Agent] Streaming Response Handler**: Extend agent/core.py with stream_response(agent, user_input: str) generator function, implement chunk-based streaming (yield text chunks as they arrive from PydanticAI), ensure tool usage transparency (responses must explicitly mention which tools were used), handle streaming errors gracefully (yield error message chunk on failure), and write integration tests in tests/integration/test_streaming.py (test successful streaming, test tool transparency in output, test error during streaming).
 

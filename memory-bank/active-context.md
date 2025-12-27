@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Session Focus
-**Task:** [Tool] Tavily Research Tool (Task #8 from progress-tracker.md) - COMPLETED
+**Task:** [Agent] PydanticAI Agent Core (Task #9 from progress-tracker.md) - COMPLETED
 
 ## Recent Changes
 
@@ -547,8 +547,106 @@ FinancialAgentError (base)
 - max_results bounded to 1-20 to prevent excessive API usage
 - Basic search depth prioritizes speed over comprehensiveness
 
+### 2025-12-27 - PydanticAI Agent Core
+**Status:** COMPLETED
+
+**Completed:**
+- Created src/agent/financial_agent.py with comprehensive PydanticAI agent implementation:
+  - create_agent(model_choice: str) function supporting dual-model configuration
+  - Model support: OLLAMA (qwen2.5:3b local) and OpenAI (gpt-4o-mini cloud)
+  - Configuration validation:
+    - LOGFIRE_TOKEN required for all models
+    - OLLAMA_BASE_URL and OLLAMA_MODEL_NAME required for OLLAMA model
+    - Case-insensitive model choice ("ollama", "OLLAMA", "openai", "OpenAI" all work)
+  - PydanticAI model strings:
+    - OLLAMA: "ollama:qwen2.5:3b" (reads OLLAMA_BASE_URL from environment)
+    - OpenAI: "openai:gpt-4o-mini" (reads OPENAI_API_KEY from environment)
+  - Tool registration:
+    - finance_tool: Wraps get_stock_price() from src.tools.finance_tool
+    - research_tool: Wraps search_web() from src.tools.research_tool
+    - Both registered using @agent.tool decorator with RunContext support
+  - System instructions (SYSTEM_INSTRUCTIONS constant):
+    - Ticker conversion guidance: AI must convert company names to tickers
+    - NO hardcoding rule: Explicitly forbids hardcoded mappings
+    - Tool transparency requirement: Agent MUST mention which tool it's using
+    - Tool selection guidance: When to use finance vs research tool
+    - Multiple tool support: Agent can use tools sequentially
+    - Error handling instructions: Clear error communication to users
+  - LogFire integration:
+    - logfire.configure(token=LOGFIRE_TOKEN) called on agent creation
+    - logfire.info() logs agent creation with metadata (model_choice, model_string, tools)
+  - Full type hints: Agent return type, all parameters typed
+  - Google-style docstrings with examples for create_agent() and tool functions
+  - No Unicode characters (Windows compatibility)
+
+- Created comprehensive unit tests (tests/unit/test_financial_agent.py):
+  - TestCreateAgentValidation class: 5 test cases
+    - Missing LOGFIRE_TOKEN raises ConfigurationError
+    - Invalid model_choice raises ConfigurationError
+    - Empty model_choice raises ConfigurationError
+    - OLLAMA model without OLLAMA_BASE_URL raises ConfigurationError
+    - OLLAMA model without OLLAMA_MODEL_NAME raises ConfigurationError
+  - TestCreateAgentOllama class: 2 test cases
+    - Successful OLLAMA agent creation with correct model string
+    - Case-insensitive OLLAMA model choice ("OLLAMA" works)
+  - TestCreateAgentOpenAI class: 2 test cases
+    - Successful OpenAI agent creation with correct model string
+    - Case-insensitive OpenAI model choice ("OpenAI" works)
+  - TestAgentToolRegistration class: 2 test cases
+    - Both tools registered with OLLAMA agent (verified via LogFire logs)
+    - Both tools registered with OpenAI agent (verified via LogFire logs)
+  - TestSystemInstructions class: 6 test cases
+    - System instructions contain ticker conversion guidance
+    - System instructions contain tool transparency requirement
+    - System instructions contain finance tool usage guidance
+    - System instructions contain research tool usage guidance
+    - System instructions forbid hardcoding mappings
+    - System instructions passed to Agent constructor
+  - TestLogFireIntegration class: 2 test cases
+    - LogFire configured with correct token
+    - LogFire logs agent creation with metadata
+  - Total: 19 test cases, all passing
+  - All tests mock Agent class and logfire to avoid real API calls
+  - Tests cover: validation, model selection, tool registration, system instructions, LogFire integration
+
+**Test Results:**
+- Financial agent tests: 19/19 passing
+- All unit tests: 125/125 passing (106 previous + 19 new)
+- Test execution time: 8.63s
+- Command used: daniel/Scripts/python.exe -m pytest tests/unit/ -v --tb=short
+
+**Files Created:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\src\agent\financial_agent.py
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\tests\unit\test_financial_agent.py
+
+**Files Modified:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\progress-tracker.md (Task #9 marked complete, 9/15 completed)
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\active-context.md (this file)
+
+**Implementation Details:**
+- Function signature: create_agent(model_choice: str) -> Agent
+- Model choice: "ollama" or "openai" (case-insensitive)
+- OLLAMA configuration: Uses OLLAMA_BASE_URL from environment (PydanticAI auto-reads it)
+- OpenAI configuration: Uses OPENAI_API_KEY from environment (PydanticAI auto-reads it)
+- Tool functions defined as nested functions within create_agent() and decorated with @agent.tool
+- Tool functions receive RunContext automatically (though not used in current implementation)
+- Both tools return dict[str, Any] matching original tool signatures
+- LogFire logs include: model_choice, model_string, and list of registered tools
+- System instructions are 30+ lines with detailed guidance for AI behavior
+- Error messages include specific configuration instructions
+
+**Critical Design Decisions:**
+- Streaming NOT implemented in this task (deferred to Task #10 per instructions)
+- Agent creation returns Agent instance directly (no wrapper class)
+- Tools registered via decorator pattern (not tools parameter) for cleaner code
+- System instructions stored as module constant for testability
+- LogFire configured once per agent creation (not globally)
+- Model string format follows PydanticAI conventions: "provider:model_name"
+- Tool transparency enforced via system instructions (not code)
+- Ticker conversion delegated to AI (not implemented in tool layer)
+
 **Next Task:**
-- Task #9: [Agent] PydanticAI Agent Core
-- Will create agent/core.py with agent initialization
-- Will register both finance_tool and research_tool
-- Will implement streaming and LogFire integration
+- Task #10: [Agent] Streaming Response Handler
+- Will extend agent functionality with streaming support
+- Will implement stream_response() generator function
+- Will handle chunk-based streaming and error handling
