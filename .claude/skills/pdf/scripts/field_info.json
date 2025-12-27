@@ -1,0 +1,367 @@
+[
+  {
+    "field_id": "Given Name Text Box",
+    "type": "text",
+    "page": 1,
+    "rect": [
+      165.699997,
+      453.70001,
+      315.70001,
+      467.89999
+    ]
+  },
+  {
+    "field_id": "Family Name Text Box",
+    "type": "text",
+    "page": 1,
+    "rect": [
+      165.699997,
+      421.20001,
+      315.70001,
+      435.39999
+    ]
+  },
+  {
+    "field_id": "House nr Text Box",
+    "type": "text",
+    "page": 1,
+    "rect": [
+      378.39999,
+      388.39999,
+      446.89999,
+      402.60001
+    ]
+  },
+  {
+    "field_id": "Address 1 Text Box",
+    "type": "text",
+    "page": 1,
+    "rect": [
+      165.699997,
+      388.29999,
+      315.70001,
+      402.5
+    ]
+  },
+  {
+    "field_id": "Address 2 Text Box",
+    "type": "text",
+    "page": 1,
+    "rect": [
+      165.699997,
+      368.39999,
+      315.70001,
+      382.60001
+    ]
+  },
+  {
+    "field_id": "Postcode Text Box",
+    "type": "text",
+    "page": 1,
+    "rect": [
+      165.699997,
+      348.5,
+      238.5,
+      362.70001
+    ]
+  },
+  {
+    "field_id": "City Text Box",
+    "type": "text",
+    "page": 1,
+    "rect": [
+      297.10001,
+      348.5,
+      447.20001,
+      362.70001
+    ]
+  },
+  {
+    "field_id": "Country Combo Box",
+    "type": "choice",
+    "choice_options": [
+      {
+        "value": "A",
+        "text": "u"
+      },
+      {
+        "value": "B",
+        "text": "e"
+      },
+      {
+        "value": "B",
+        "text": "r"
+      },
+      {
+        "value": "B",
+        "text": "u"
+      },
+      {
+        "value": "C",
+        "text": "r"
+      },
+      {
+        "value": "C",
+        "text": "y"
+      },
+      {
+        "value": "C",
+        "text": "z"
+      },
+      {
+        "value": "D",
+        "text": "e"
+      },
+      {
+        "value": "E",
+        "text": "s"
+      },
+      {
+        "value": "F",
+        "text": "i"
+      },
+      {
+        "value": "F",
+        "text": "r"
+      },
+      {
+        "value": "G",
+        "text": "e"
+      },
+      {
+        "value": "G",
+        "text": "r"
+      },
+      {
+        "value": "H",
+        "text": "u"
+      },
+      {
+        "value": "I",
+        "text": "r"
+      },
+      {
+        "value": "I",
+        "text": "t"
+      },
+      {
+        "value": "L",
+        "text": "a"
+      },
+      {
+        "value": "L",
+        "text": "i"
+      },
+      {
+        "value": "L",
+        "text": "u"
+      },
+      {
+        "value": "M",
+        "text": "a"
+      },
+      {
+        "value": "N",
+        "text": "e"
+      },
+      {
+        "value": "P",
+        "text": "o"
+      },
+      {
+        "value": "P",
+        "text": "o"
+      },
+      {
+        "value": "R",
+        "text": "o"
+      },
+      {
+        "value": "S",
+        "text": "l"
+      },
+      {
+        "value": "S",
+        "text": "l"
+      },
+      {
+        "value": "S",
+        "text": "p"
+      },
+      {
+        "value": "S",
+        "text": "w"
+      }
+    ],
+    "page": 1,
+    "rect": [
+      165.699997,
+      315.89999,
+      315.70001,
+      330.10001
+    ]
+  },
+  {
+    "field_id": "Gender List Box",
+    "type": "choice",
+    "choice_options": [
+      {
+        "value": "M",
+        "text": "a"
+      },
+      {
+        "value": "W",
+        "text": "o"
+      }
+    ],
+    "page": 1,
+    "rect": [
+      165.699997,
+      283.39999,
+      241.2,
+      297.60001
+    ]
+  },
+  {
+    "field_id": "Height Formatted Field",
+    "type": "text",
+    "page": 1,
+    "rect": [
+      165.699997,
+      250.8,
+      238,
+      265
+    ]
+  },
+  {
+    "field_id": "Driving License Check Box",
+    "type": "checkbox",
+    "checked_value": "/Yes",
+    "unchecked_value": "/Off",
+    "page": 1,
+    "rect": [
+      164.100006,
+      221.39999,
+      175.39999,
+      232.3
+    ]
+  },
+  {
+    "field_id": "Language 1 Check Box",
+    "type": "checkbox",
+    "checked_value": "/Yes",
+    "unchecked_value": "/Off",
+    "page": 1,
+    "rect": [
+      57.700001,
+      177.60001,
+      69,
+      188.5
+    ]
+  },
+  {
+    "field_id": "Language 2 Check Box",
+    "type": "checkbox",
+    "checked_value": "/Yes",
+    "unchecked_value": "/Off",
+    "page": 1,
+    "rect": [
+      154.800003,
+      177.60001,
+      166.100006,
+      188.5
+    ]
+  },
+  {
+    "field_id": "Language 3 Check Box",
+    "type": "checkbox",
+    "checked_value": "/Yes",
+    "unchecked_value": "/Off",
+    "page": 1,
+    "rect": [
+      251.8,
+      177.60001,
+      263.10001,
+      188.5
+    ]
+  },
+  {
+    "field_id": "Language 4 Check Box",
+    "type": "checkbox",
+    "checked_value": "/Yes",
+    "unchecked_value": "/Off",
+    "page": 1,
+    "rect": [
+      342.79999,
+      177.60001,
+      354.10001,
+      188.5
+    ]
+  },
+  {
+    "field_id": "Language 5 Check Box",
+    "type": "checkbox",
+    "checked_value": "/Yes",
+    "unchecked_value": "/Off",
+    "page": 1,
+    "rect": [
+      439.79999,
+      177.60001,
+      451.10001,
+      188.5
+    ]
+  },
+  {
+    "field_id": "Favourite Colour List Box",
+    "type": "choice",
+    "choice_options": [
+      {
+        "value": "B",
+        "text": "l"
+      },
+      {
+        "value": "B",
+        "text": "r"
+      },
+      {
+        "value": "R",
+        "text": "e"
+      },
+      {
+        "value": "O",
+        "text": "r"
+      },
+      {
+        "value": "Y",
+        "text": "e"
+      },
+      {
+        "value": "G",
+        "text": "r"
+      },
+      {
+        "value": "B",
+        "text": "l"
+      },
+      {
+        "value": "V",
+        "text": "i"
+      },
+      {
+        "value": "G",
+        "text": "r"
+      },
+      {
+        "value": "W",
+        "text": "h"
+      }
+    ],
+    "page": 1,
+    "rect": [
+      165.699997,
+      143.399994,
+      322.79999,
+      157.600006
+    ]
+  }
+]

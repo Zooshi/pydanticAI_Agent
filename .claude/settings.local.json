@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "Bash(mkdir:*)",
+      "Bash(uv:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(source:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(dir:*)",
+      "Bash(daniel\\Scripts\\activate.bat)",
+      "Bash(danielScriptsactivate.bat)",
+      "Bash(pip install:*)",
+      "Bash(cmd /c \"daniel\\Scripts\\activate.bat && pip install -r requirements.txt\")",
+      "Bash(danielScriptspython.exe -m pip install -r requirements.txt)",
+      "Bash(\"daniel/Scripts/python.exe\" -m pip install:*)",
+      "Bash(\"daniel/Scripts/python.exe\" -m pip search pydantic-ai-slim)",
+      "Bash(curl:*)",
+      "Bash(\"daniel/Scripts/python.exe\" -m streamlit run:*)",
+      "Bash(timeout:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_close",
+      "Bash(python -m json.tool:*)",
+      "Skill(pdf)",
+      "Read(//c/Users/danie/OneDrive/Desktop/**)",
+      "Bash(python:*)",
+      "Bash(powershell -Command:*)"
+    ],
+    "deny": []
+  },
+  "outputStyle": "Explanatory"
+}

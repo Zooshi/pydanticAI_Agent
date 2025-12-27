@@ -1,0 +1,104 @@
+[
+  {
+    "field_id": "Given Name Text Box",
+    "description": "User's first/given name",
+    "page": 1,
+    "value": "Johann"
+  },
+  {
+    "field_id": "Family Name Text Box",
+    "description": "User's last/family name",
+    "page": 1,
+    "value": "Schmidt"
+  },
+  {
+    "field_id": "House nr Text Box",
+    "description": "House number",
+    "page": 1,
+    "value": "42"
+  },
+  {
+    "field_id": "Address 1 Text Box",
+    "description": "Street address line 1",
+    "page": 1,
+    "value": "Hauptstrasse"
+  },
+  {
+    "field_id": "Address 2 Text Box",
+    "description": "Street address line 2",
+    "page": 1,
+    "value": "Apartment 5B"
+  },
+  {
+    "field_id": "Postcode Text Box",
+    "description": "Postal/ZIP code",
+    "page": 1,
+    "value": "10115"
+  },
+  {
+    "field_id": "City Text Box",
+    "description": "City name",
+    "page": 1,
+    "value": "Berlin"
+  },
+  {
+    "field_id": "Country Combo Box",
+    "description": "Country selection (selecting Germany)",
+    "page": 1,
+    "value": "G"
+  },
+  {
+    "field_id": "Gender List Box",
+    "description": "Gender selection (Male)",
+    "page": 1,
+    "value": "M"
+  },
+  {
+    "field_id": "Height Formatted Field",
+    "description": "Height in centimeters",
+    "page": 1,
+    "value": "175"
+  },
+  {
+    "field_id": "Driving License Check Box",
+    "description": "Has driving license - checked",
+    "page": 1,
+    "value": "/Yes"
+  },
+  {
+    "field_id": "Language 1 Check Box",
+    "description": "First language checkbox - checked",
+    "page": 1,
+    "value": "/Yes"
+  },
+  {
+    "field_id": "Language 2 Check Box",
+    "description": "Second language checkbox - checked",
+    "page": 1,
+    "value": "/Yes"
+  },
+  {
+    "field_id": "Language 3 Check Box",
+    "description": "Third language checkbox - unchecked",
+    "page": 1,
+    "value": "/Off"
+  },
+  {
+    "field_id": "Language 4 Check Box",
+    "description": "Fourth language checkbox - checked",
+    "page": 1,
+    "value": "/Yes"
+  },
+  {
+    "field_id": "Language 5 Check Box",
+    "description": "Fifth language checkbox - unchecked",
+    "page": 1,
+    "value": "/Off"
+  },
+  {
+    "field_id": "Favourite Colour List Box",
+    "description": "Favorite color selection (Blue)",
+    "page": 1,
+    "value": "B"
+  }
+]
