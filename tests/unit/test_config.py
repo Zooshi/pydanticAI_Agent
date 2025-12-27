@@ -14,11 +14,8 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 from src import config
-from src.config import (
-    ConfigurationError,
-    get_config_summary,
-    validate_config,
-)
+from src.config import get_config_summary, validate_config
+from src.utils.exceptions import ConfigurationError
 
 
 class TestConfigurationValidation:

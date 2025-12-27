@@ -9,15 +9,7 @@ import time
 from collections import deque
 from typing import Deque
 
-
-class RateLimitExceededError(Exception):
-    """Raised when rate limit is exceeded.
-
-    This exception is raised when a request would exceed the configured
-    rate limit. The error message includes the wait time in seconds before
-    the next request can be made.
-    """
-    pass
+from src.utils.exceptions import RateLimitExceededError
 
 
 class RateLimiter:

@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Session Focus
-**Task:** [Utility] Rate Limiter Implementation (Task #5 from progress-tracker.md) - COMPLETED
+**Task:** [Utility] Custom Exception Classes (Task #6 from progress-tracker.md) - COMPLETED
 
 ## Recent Changes
 
@@ -267,5 +267,80 @@ src/
 - reset_time() method included specifically for testing purposes
 
 **Next Task:**
-- Task #6: [Utility] Custom Exceptions
-- Will create src/utils/exceptions.py and move RateLimitExceededError there, along with ToolExecutionError and ConfigurationError
+- Task #7: [Tool] YFinance Finance Tool
+- Will create tools/finance.py with stock price fetching functionality
+
+### 2025-12-27 - Custom Exception Classes
+**Status:** COMPLETED
+
+**Completed:**
+- Created src/utils/exceptions.py with centralized exception hierarchy:
+  - FinancialAgentError base exception class
+  - ConfigurationError: Missing or invalid configuration (moved from config.py)
+  - RateLimitExceededError: Rate limit exceeded with wait time info (moved from rate_limiter.py)
+  - ToolExecutionError: Tool execution failures (new)
+  - All exceptions inherit from FinancialAgentError base class
+  - Full docstrings explaining when each exception should be raised
+  - Example usage patterns included in docstrings
+
+- Refactored existing code to use centralized exceptions:
+  - Updated src/config.py: Import ConfigurationError from src.utils.exceptions
+  - Updated src/utils/rate_limiter.py: Import RateLimitExceededError from src.utils.exceptions
+  - Updated tests/unit/test_config.py: Import ConfigurationError from src.utils.exceptions
+  - Updated tests/unit/test_rate_limiter.py: Import RateLimitExceededError from src.utils.exceptions
+  - All existing tests still passing after refactoring
+
+- Created comprehensive unit tests (tests/unit/test_exceptions.py):
+  - TestFinancialAgentError: 4 test cases (base exception behavior, inheritance catching)
+  - TestConfigurationError: 6 test cases (inheritance, messages, edge cases)
+  - TestRateLimitExceededError: 5 test cases (inheritance, messages, wait time format)
+  - TestToolExecutionError: 6 test cases (inheritance, messages, tool-specific formats)
+  - TestExceptionHierarchy: 4 test cases (inheritance relationships, sibling isolation)
+  - TestExceptionUsagePatterns: 3 test cases (chaining, multiple types, formatting)
+  - Total: 28 test cases, all passing
+  - Coverage includes: inheritance, message preservation, exception chaining, multi-type catching
+
+**Test Results:**
+- Exception tests: 28/28 passing
+- Config tests: 17/17 passing (after refactoring)
+- Rate limiter tests: 19/19 passing (after refactoring)
+- Total unit tests: 64/64 passing
+- Test execution time: 6.55s
+- Commands used:
+  - python -m pytest tests/unit/test_exceptions.py -v
+  - python -m pytest tests/unit/ -v
+
+**Files Created:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\src\utils\exceptions.py
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\tests\unit\test_exceptions.py
+
+**Files Modified:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\src\config.py (import refactored)
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\src\utils\rate_limiter.py (import refactored)
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\tests\unit\test_config.py (import refactored)
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\tests\unit\test_rate_limiter.py (import refactored)
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\progress-tracker.md
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\active-context.md
+
+**Exception Hierarchy:**
+```
+FinancialAgentError (base)
+├── ConfigurationError - Missing or invalid configuration
+├── RateLimitExceededError - Rate limit exceeded with wait time info
+└── ToolExecutionError - Tool execution failures
+```
+
+**Implementation Notes:**
+- All exceptions follow consistent pattern with base class inheritance
+- ConfigurationError successfully moved from config.py to centralized module
+- RateLimitExceededError successfully moved from rate_limiter.py to centralized module
+- ToolExecutionError created for future tool implementations (Tasks #7-8)
+- All existing functionality preserved - no breaking changes
+- Exception messages include helpful context for debugging
+- Base class allows catching all custom exceptions with single handler
+- Sibling exceptions properly isolated (don't catch each other)
+
+**Next Task:**
+- Task #7: [Tool] YFinance Finance Tool
+- Will create tools/finance.py with stock price fetching functionality
+- Will use ToolExecutionError from centralized exceptions module

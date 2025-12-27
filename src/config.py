@@ -25,10 +25,7 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
-
-class ConfigurationError(Exception):
-    """Raised when required configuration is missing or invalid."""
-    pass
+from src.utils.exceptions import ConfigurationError
 
 
 # Load environment variables from .env file if it exists

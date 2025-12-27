@@ -6,7 +6,8 @@ from unittest.mock import patch
 
 import pytest
 
-from src.utils.rate_limiter import RateLimiter, RateLimitExceededError
+from src.utils.rate_limiter import RateLimiter
+from src.utils.exceptions import RateLimitExceededError
 
 
 class TestRateLimiterInitialization:
