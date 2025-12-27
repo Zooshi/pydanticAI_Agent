@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Session Focus
-**Task:** [Utility] Custom Exception Classes (Task #6 from progress-tracker.md) - COMPLETED
+**Task:** [Tool] YFinance Finance Tool (Task #7 from progress-tracker.md) - COMPLETED
 
 ## Recent Changes
 
@@ -344,3 +344,113 @@ FinancialAgentError (base)
 - Task #7: [Tool] YFinance Finance Tool
 - Will create tools/finance.py with stock price fetching functionality
 - Will use ToolExecutionError from centralized exceptions module
+
+### 2025-12-27 - YFinance Finance Tool
+**Status:** COMPLETED
+
+**Completed:**
+- Created src/tools/finance_tool.py with comprehensive stock price lookup functionality:
+  - get_stock_price(ticker: str) function that fetches real-time stock data from YFinance
+  - Comprehensive ticker validation:
+    - Type check: must be non-empty string
+    - Auto-uppercase conversion
+    - Whitespace trimming
+    - Maximum length validation (10 characters)
+  - Rate limiter integration:
+    - Global RateLimiter instance (10 requests per 60 seconds)
+    - check_and_record() called before every API request
+    - RateLimitExceededError propagated with wait time
+  - Intelligent field extraction with multiple fallbacks:
+    - currentPrice -> regularMarketPrice -> previousClose (for current price)
+    - dayHigh -> regularMarketDayHigh (for day high)
+    - dayLow -> regularMarketDayLow (for day low)
+    - volume -> regularMarketVolume (for volume)
+    - currency (defaults to "USD")
+  - Returns structured dict with 7 fields: ticker, current_price, previous_close, day_high, day_low, volume, currency
+  - Comprehensive error handling:
+    - Invalid/empty ticker -> ToolExecutionError with specific message
+    - No data from API -> ToolExecutionError ("not found or no data available")
+    - No price data in response -> ToolExecutionError ("No price data available")
+    - Any YFinance exception -> ToolExecutionError with context (ticker, exception type, message)
+  - get_rate_limiter() accessor function for testing
+  - Full type hints with dict[str, Any] return type
+  - Google-style docstrings with examples
+  - No Unicode characters (Windows compatibility)
+
+- Created comprehensive unit tests (tests/unit/test_finance_tool.py):
+  - TestGetStockPriceSuccess: 6 test cases
+    - Valid ticker returns complete data
+    - Lowercase ticker converts to uppercase
+    - Ticker with whitespace is trimmed
+    - Uses regularMarketPrice fallback
+    - Uses previousClose as last fallback
+    - Defaults missing fields to 0 or default values
+  - TestGetStockPriceRateLimiting: 2 test cases
+    - Rate limit exceeded raises RateLimitExceededError
+    - Rate limit error includes wait time
+  - TestGetStockPriceInvalidInput: 5 test cases
+    - Empty string raises error
+    - Whitespace-only raises error
+    - None raises error
+    - Non-string (integer) raises error
+    - Too long ticker (>10 chars) raises error
+  - TestGetStockPriceAPIErrors: 6 test cases
+    - Invalid ticker not found raises error
+    - Minimal info response raises error
+    - No price data raises error
+    - YFinance exception wrapped in ToolExecutionError
+    - Timeout error wrapped
+    - Generic exception wrapped
+  - TestGetRateLimiter: 1 test case
+    - Accessor function returns global limiter instance
+  - Total: 20 test cases, all passing
+  - All tests mock yfinance.Ticker with unittest.mock
+  - No real API calls in tests
+  - Rate limiter reset in setUp for each test class
+
+- Installed yfinance package and dependencies:
+  - yfinance 1.0 installed
+  - Dependencies: pandas 2.3.3, numpy 2.4.0, beautifulsoup4 4.14.3, curl_cffi 0.13.0, etc.
+  - Total installation: 21 packages
+  - Installation time: ~45 seconds
+  - No errors or blocking warnings
+
+**Test Results:**
+- Finance tool tests: 20/20 passing
+- Config tests: 17/17 passing
+- Exception tests: 28/28 passing
+- Rate limiter tests: 19/19 passing
+- Total unit tests: 84/84 passing
+- Test execution time: 7.31s
+- Command used: python -m pytest tests/ -v --tb=short
+
+**Files Created:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\src\tools\finance_tool.py
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\tests\unit\test_finance_tool.py
+
+**Files Modified:**
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\progress-tracker.md (Task #7 marked complete)
+- C:\Users\danie\OneDrive\Desktop\cur\27122025\memory-bank\active-context.md (this file)
+
+**Implementation Details:**
+- Global rate limiter instance created at module level (_rate_limiter)
+- Rate limiter configured for 10 ticker lookups per 60 seconds
+- ToolExecutionError re-raised without wrapping to preserve error context
+- All other exceptions wrapped in ToolExecutionError with ticker context
+- Field extraction handles different YFinance response formats (ETFs, stocks, etc.)
+- Default values: 0.0 for prices/volumes, "USD" for currency
+- Type conversions: float() for prices, int() for volume, str() for currency
+- Validation happens before rate limiter check to avoid wasting quota
+
+**Critical Design Decisions:**
+- AI agent converts company names to tickers (NOT the tool)
+- Tool receives ticker symbol as string input
+- NO hardcoded company-to-ticker mappings
+- Tool focuses on API integration and error handling
+- Rate limiting enforced at tool level (not agent level)
+
+**Next Task:**
+- Task #8: [Tool] Tavily Research Tool
+- Will create tools/research.py with web search functionality
+- Will use ToolExecutionError for API failures
+- Similar structure to finance_tool.py

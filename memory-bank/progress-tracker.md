@@ -2,8 +2,8 @@
 
 ## Status
 - **Total Tickets:** 15
-- **Completed:** 6
-- **Pending:** 9
+- **Completed:** 7
+- **Pending:** 8
 
 ## Implementation Backlog (Ordered)
 
@@ -25,7 +25,7 @@
 
 ### Phase 3: Tool Layer
 
-- [ ] **[Tool] YFinance Finance Tool**: Create tools/finance.py with get_stock_price(ticker: str) function, implement ticker validation using validate_ticker() helper, integrate rate limiter check before API call, fetch latest stock price using yfinance library, handle errors (ticker not found, API failures) by raising ToolExecutionError with clear messages, return structured dict with price, currency, timestamp, and write unit tests in tests/unit/test_finance_tool.py with mocked yfinance API (test valid ticker, test invalid ticker, test rate limit, test API error).
+- [x] **[Tool] YFinance Finance Tool**: Create tools/finance.py with get_stock_price(ticker: str) function, implement ticker validation using validate_ticker() helper, integrate rate limiter check before API call, fetch latest stock price using yfinance library, handle errors (ticker not found, API failures) by raising ToolExecutionError with clear messages, return structured dict with price, currency, timestamp, and write unit tests in tests/unit/test_finance_tool.py with mocked yfinance API (test valid ticker, test invalid ticker, test rate limit, test API error).
 
 - [ ] **[Tool] Tavily Research Tool**: Create tools/research.py with web_search(query: str) function, implement Tavily API integration using TAVILY_API_KEY from config, handle API errors by raising ToolExecutionError, return structured dict with search results and summary, and write unit tests in tests/unit/test_research_tool.py with mocked Tavily API (test successful search, test API error, test empty results).
 
@@ -65,6 +65,8 @@
 - **[Utility] Rate Limiter Implementation**: Created src/utils/rate_limiter.py with sliding window algorithm implementation. Implemented RateLimiter class with thread-safe operations using threading.Lock and deque for efficient timestamp management. Supports configurable rate limits (default 10 requests per 60 seconds). Includes RateLimitExceededError exception with clear error messages showing wait time. Implements check_and_record(), get_remaining_requests(), and reset_time() methods. Created comprehensive unit tests in tests/unit/test_rate_limiter.py with 19 test cases covering initialization, basic functionality, sliding window behavior, thread safety, and edge cases. All tests passing. Rate limiter uses <= comparison for window boundary to correctly expire timestamps at exact boundaries.
 
 - **[Utility] Custom Exceptions**: Created src/utils/exceptions.py with centralized exception hierarchy. Defined FinancialAgentError as base exception class. Implemented ConfigurationError (moved from config.py), RateLimitExceededError (moved from rate_limiter.py), and ToolExecutionError (new). All exceptions inherit from FinancialAgentError base class. Refactored existing code: Updated imports in src/config.py, src/utils/rate_limiter.py, tests/unit/test_config.py, and tests/unit/test_rate_limiter.py. Created comprehensive unit tests in tests/unit/test_exceptions.py with 28 test cases covering base exception behavior, all three exception types, inheritance hierarchy, sibling isolation, exception chaining, and usage patterns. All 64 unit tests passing (17 config + 28 exceptions + 19 rate limiter). No breaking changes - all existing functionality preserved.
+
+- **[Tool] YFinance Finance Tool**: Created src/tools/finance_tool.py with get_stock_price(ticker: str) function that integrates with YFinance API. Implemented comprehensive ticker validation (non-empty string, max 10 chars, auto-uppercase, whitespace trimming). Integrated rate limiter (10 ticker lookups per minute) via check_and_record() before API calls. Implemented intelligent field extraction with multiple fallbacks (currentPrice -> regularMarketPrice -> previousClose) to handle different ticker response formats. Returns structured dict with ticker, current_price, previous_close, day_high, day_low, volume, currency. Comprehensive error handling: raises ToolExecutionError for invalid tickers, no price data, or API failures with contextual error messages. Created 20 comprehensive unit tests in tests/unit/test_finance_tool.py covering successful lookups (6 tests), rate limiting (2 tests), invalid input (5 tests), API errors (6 tests), and utility function (1 test). All tests mock YFinance API calls. Installed yfinance package (version 1.0) with all dependencies. All 84 unit tests passing (17 config + 28 exceptions + 19 rate limiter + 20 finance tool).
 
 ## Known Issues
 _None yet. Issues will be logged here as they are discovered during implementation._
