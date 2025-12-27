@@ -19,3 +19,5 @@ This file tracks all commits made during the development of the PydanticAI Strea
 - 2025-12-27 (Task #12) - feat: Integrate PydanticAI agent with streaming responses in Streamlit UI (a1a11ba)
 - 2025-12-27 (Bugfix) - fix: Correct OLLAMA model name (qwen2.5:3b → qwen3:8b) and fix Union type error in message history (a2f0d80)
 - 2025-12-27 (Bugfix) - fix: Resolve streaming and OLLAMA configuration issues (946e153)
+- 2025-12-27 (Feature) - feat: Add thinking token filter for reasoning models (qwen3, DeepSeek-R1) with 17 unit tests (5a7edb9)
+- 2025-12-27 (Feature) - feat: Add Pydantic instrumentation to LogFire observability (c7fd956)
